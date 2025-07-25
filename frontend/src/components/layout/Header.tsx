@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { WalletButton } from '@/components/wallet/WalletButton';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Coins, Plus, FileText, Settings } from 'lucide-react';
+import { Menu, Coins, Plus, FileText, Settings, TestTube } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
@@ -24,6 +24,11 @@ const navigation = [
     name: 'Create Collection',
     href: '/collections/create',
     icon: Plus,
+  },
+  {
+    name: 'Demo',
+    href: '/demo',
+    icon: TestTube,
   },
   {
     name: 'Settings',
