@@ -29,7 +29,7 @@ export class MockAPI {
     return { success: true, data: user };
   }
 
-  static async createUser(userData: any) {
+  static async createUser(userData: Record<string, unknown>) {
     if (!USE_MOCK_API) throw new Error('Mock API is disabled');
     
     await simulateDelay(MOCK_DELAY);
@@ -76,7 +76,7 @@ export class MockAPI {
     return { success: true, data: collection };
   }
 
-  static async createCollection(collectionData: any) {
+  static async createCollection(collectionData: Record<string, unknown>) {
     if (!USE_MOCK_API) throw new Error('Mock API is disabled');
     
     await simulateDelay(MOCK_DELAY * 2); // Longer delay for creation
@@ -101,7 +101,7 @@ export class MockAPI {
     return { success: true, data: newCollection };
   }
 
-  static async updateCollection(id: string, updateData: any) {
+  static async updateCollection(id: string, updateData: Record<string, unknown>) {
     if (!USE_MOCK_API) throw new Error('Mock API is disabled');
     
     await simulateDelay(MOCK_DELAY);
@@ -139,7 +139,7 @@ export class MockAPI {
     };
   }
 
-  static async uploadMetadata(collectionId: string, csvData: any[]) {
+  static async uploadMetadata(collectionId: string, csvData: Record<string, unknown>[]) {
     if (!USE_MOCK_API) throw new Error('Mock API is disabled');
     
     await simulateDelay(MOCK_DELAY * 3); // Longer delay for upload
@@ -203,7 +203,7 @@ export class MockAPI {
     return { success: true, data: job };
   }
 
-  static async createMintJob(jobData: any) {
+  static async createMintJob(jobData: Record<string, unknown>) {
     if (!USE_MOCK_API) throw new Error('Mock API is disabled');
     
     await simulateDelay(MOCK_DELAY);
