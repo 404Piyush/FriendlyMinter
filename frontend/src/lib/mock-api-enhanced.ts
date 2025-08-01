@@ -1,6 +1,6 @@
 // Enhanced Mock API with realistic delays and error simulation
 import { enhancedMockData } from './mock-enhanced';
-import { Collection, NFTMetadata, MintJob, User, Transaction } from '@/types';
+import { EnhancedCollection, NFTMetadata, MintJob, User, Transaction } from '../types';
 
 // Configuration
 const MOCK_DELAY = parseInt(process.env.NEXT_PUBLIC_MOCK_DELAY || '1000');
@@ -61,27 +61,27 @@ export class MockAPIEnhanced {
   }
 
   // Collection Management
-  async getCollections(userId?: string): Promise<Collection[]> {
+  async getCollections(userId?: string): Promise<EnhancedCollection[]> {
     await delay(MOCK_DELAY * 0.7);
     simulateError('fetch collections');
     
     if (userId) {
-      return this.data.collections.filter(collection => collection.creatorId === userId);
+      return this.data.collections.filter(collection => collection.userId === userId);
     }
     return [...this.data.collections];
   }
 
-  async getCollectionById(id: string): Promise<Collection | null> {
+  async getCollectionById(id: string): Promise<EnhancedCollection | null> {
     await delay(MOCK_DELAY * 0.4);
     simulateError('fetch collection');
     return this.data.collections.find(collection => collection.id === id) || null;
   }
 
-  async createCollection(collectionData: Omit<Collection, 'id' | 'createdAt' | 'updatedAt' | 'mintedCount' | 'floorPrice' | 'volume24h'>): Promise<Collection> {
+  async createCollection(collectionData: Omit<EnhancedCollection, 'id' | 'createdAt' | 'updatedAt' | 'mintedCount' | 'floorPrice' | 'volume24h'>): Promise<EnhancedCollection> {
     await delay(MOCK_DELAY * 1.5);
     simulateError('create collection');
     
-    const newCollection: Collection = {
+    const newCollection: EnhancedCollection = {
       ...collectionData,
       id: generateId(),
       mintedCount: 0,
@@ -95,7 +95,7 @@ export class MockAPIEnhanced {
     return newCollection;
   }
 
-  async updateCollection(id: string, updates: Partial<Collection>): Promise<Collection> {
+  async updateCollection(id: string, updates: Partial<EnhancedCollection>): Promise<EnhancedCollection> {
     await delay(MOCK_DELAY);
     simulateError('update collection');
     
@@ -340,12 +340,12 @@ export class MockAPIEnhanced {
     this.data = { ...enhancedMockData };
   }
 
-  addTestData(type: keyof typeof enhancedMockData, data: any): void {
-    (this.data[type] as any[]).push(data);
+  addTestData(type: keyof typeof enhancedMockData, data: unknown): void {
+    (this.data[type] as unknown[]).push(data);
   }
 
   clearTestData(type: keyof typeof enhancedMockData): void {
-    (this.data[type] as any[]).length = 0;
+    (this.data[type] as unknown[]).length = 0;
   }
 }
 

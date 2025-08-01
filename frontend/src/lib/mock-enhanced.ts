@@ -1,5 +1,5 @@
 // Enhanced mock data for comprehensive frontend testing
-import { Collection, NFTMetadata, MintJob, User, Transaction } from '@/types';
+import { EnhancedCollection, NFTMetadata, MintJob, User, Transaction, Notification } from '../types';
 
 // Mock users with different roles and states
 export const mockUsers: User[] = [
@@ -32,64 +32,71 @@ export const mockUsers: User[] = [
 ];
 
 // Enhanced mock collections with various states
-export const mockCollectionsEnhanced: Collection[] = [
+export const mockCollectionsEnhanced: EnhancedCollection[] = [
   {
     id: 'collection-1',
     name: 'Pixel Warriors',
     description: 'A collection of 8-bit style warrior NFTs with unique abilities and rare traits.',
     symbol: 'PIXWAR',
+    imageUrl: 'https://picsum.photos/400/400?random=1',
     image: 'https://picsum.photos/400/400?random=1',
-    creatorId: 'user-1',
-    totalSupply: 1000,
+    maxNfts: 1000,
     mintedCount: 750,
+    status: 'MINTING' as const,
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-01-20'),
+    userId: 'user-1',
+    maxDepth: 14,
+    maxBufferSize: 64,
+    canopyDepth: 10,
     floorPrice: 0.5,
     volume24h: 12.5,
     isActive: true,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-20'),
     royalty: 5.0,
-    category: 'Gaming',
-    tags: ['pixel-art', 'gaming', 'warriors', 'collectible'],
-    website: 'https://pixelwarriors.example.com',
-    twitter: '@pixelwarriors',
-    discord: 'https://discord.gg/pixelwarriors'
+    tags: ['pixel-art', 'gaming', 'warriors', 'collectible']
   },
   {
     id: 'collection-2',
     name: 'Cosmic Cats',
     description: 'Adorable space cats exploring the galaxy. Each cat has unique cosmic powers.',
     symbol: 'COSCAT',
+    imageUrl: 'https://picsum.photos/400/400?random=2',
     image: 'https://picsum.photos/400/400?random=2',
-    creatorId: 'user-1',
-    totalSupply: 500,
+    maxNfts: 500,
     mintedCount: 200,
+    status: 'MINTING' as const,
+    createdAt: new Date('2024-02-01'),
+    updatedAt: new Date('2024-02-05'),
+    userId: 'user-1',
+    maxDepth: 14,
+    maxBufferSize: 64,
+    canopyDepth: 10,
     floorPrice: 0.8,
     volume24h: 8.2,
     isActive: true,
-    createdAt: new Date('2024-02-01'),
-    updatedAt: new Date('2024-02-05'),
     royalty: 7.5,
-    category: 'Art',
-    tags: ['cats', 'space', 'cute', 'cosmic'],
-    website: 'https://cosmiccats.example.com',
-    twitter: '@cosmiccats'
+    tags: ['cats', 'space', 'cute', 'cosmic']
   },
   {
     id: 'collection-3',
     name: 'Abstract Emotions',
     description: 'AI-generated abstract art representing human emotions in vibrant colors.',
     symbol: 'ABEMO',
+    imageUrl: 'https://picsum.photos/400/400?random=3',
     image: 'https://picsum.photos/400/400?random=3',
-    creatorId: 'user-2',
-    totalSupply: 2000,
+    maxNfts: 2000,
     mintedCount: 0,
+    status: 'DRAFT' as const,
+    createdAt: new Date('2024-02-10'),
+    updatedAt: new Date('2024-02-10'),
+    userId: 'user-2',
+    maxDepth: 14,
+    maxBufferSize: 64,
+    canopyDepth: 10,
     floorPrice: 0,
     volume24h: 0,
     isActive: false,
-    createdAt: new Date('2024-02-10'),
-    updatedAt: new Date('2024-02-10'),
     royalty: 10.0,
-    category: 'AI Art',
     tags: ['abstract', 'emotions', 'ai-generated', 'colorful']
   }
 ];
@@ -298,7 +305,15 @@ export const mockAnalytics = {
 };
 
 // Mock notification data
-export const mockNotifications = [
+export const mockNotifications: Array<{
+  id: string;
+  type: 'success' | 'info' | 'error' | 'warning';
+  title: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+  actionUrl?: string;
+}> = [
   {
     id: 'notif-1',
     type: 'success',

@@ -2,7 +2,7 @@ import { Collection, CreateCollectionData } from './collection';
 import { MintJob, MintRequest, NftMetadata } from './nft';
 
 // Generic API Response
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -21,18 +21,18 @@ export interface PaginatedResponse<T> {
 }
 
 // Collection API Types
-export interface CreateCollectionRequest extends CreateCollectionData {}
-export interface CreateCollectionResponse extends ApiResponse<Collection> {}
-export interface GetCollectionsResponse extends ApiResponse<PaginatedResponse<Collection>> {}
-export interface GetCollectionResponse extends ApiResponse<Collection> {}
-export interface UpdateCollectionRequest extends Partial<CreateCollectionData> {}
-export interface UpdateCollectionResponse extends ApiResponse<Collection> {}
+export type CreateCollectionRequest = CreateCollectionData;
+export type CreateCollectionResponse = ApiResponse<Collection>;
+export type GetCollectionsResponse = ApiResponse<PaginatedResponse<Collection>>;
+export type GetCollectionResponse = ApiResponse<Collection>;
+export type UpdateCollectionRequest = Partial<CreateCollectionData>;
+export type UpdateCollectionResponse = ApiResponse<Collection>;
 
 // Mint Job API Types
-export interface CreateMintJobRequest extends MintRequest {}
-export interface CreateMintJobResponse extends ApiResponse<MintJob> {}
-export interface GetMintJobResponse extends ApiResponse<MintJob> {}
-export interface GetMintJobsResponse extends ApiResponse<PaginatedResponse<MintJob>> {}
+export type CreateMintJobRequest = MintRequest;
+export type CreateMintJobResponse = ApiResponse<MintJob>;
+export type GetMintJobResponse = ApiResponse<MintJob>;
+export type GetMintJobsResponse = ApiResponse<PaginatedResponse<MintJob>>;
 
 // File Upload API Types
 export interface UploadFileRequest {
@@ -40,22 +40,22 @@ export interface UploadFileRequest {
   collectionId?: string;
 }
 
-export interface UploadFileResponse extends ApiResponse<{
+export type UploadFileResponse = ApiResponse<{
   url: string;
   cid: string;
   size: number;
   type: string;
-}> {}
+}>;
 
 export interface UploadMetadataRequest {
   metadata: NftMetadata[];
   collectionId: string;
 }
 
-export interface UploadMetadataResponse extends ApiResponse<{
+export type UploadMetadataResponse = ApiResponse<{
   metadataUris: string[];
   totalUploaded: number;
-}> {}
+}>;
 
 // Cost Estimation API Types
 export interface CostEstimationRequest {
@@ -65,7 +65,7 @@ export interface CostEstimationRequest {
   canopyDepth?: number;
 }
 
-export interface CostEstimationResponse extends ApiResponse<{
+export type CostEstimationResponse = ApiResponse<{
   merkleTreeCost: number;
   mintingCost: number;
   totalCost: number;
@@ -74,7 +74,7 @@ export interface CostEstimationResponse extends ApiResponse<{
     transactionFees: number;
     compressionFees: number;
   };
-}> {}
+}>;
 
 // Solana Network Types
 export type SolanaNetwork = 'devnet' | 'testnet' | 'mainnet-beta';
@@ -89,7 +89,7 @@ export interface SolanaConfig {
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
 }
 

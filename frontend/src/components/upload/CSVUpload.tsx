@@ -51,7 +51,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
   const [showPreview, setShowPreview] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const validateCSVData = (data: any[]): ParsedCSVData => {
+  const validateCSVData = (data: Record<string, unknown>[]): ParsedCSVData => {
     const errors: string[] = [];
     const warnings: string[] = [];
     const validData: CsvNftData[] = [];
@@ -82,7 +82,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           errors.push(`Row ${rowNumber}: Missing required field '${column}'`);
           return;
         }
-        (nftData as any)[column] = value;
+        (nftData as Record<string, unknown>)[column] = value;
       }
 
       // Process optional fields

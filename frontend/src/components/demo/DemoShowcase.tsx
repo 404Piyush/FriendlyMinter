@@ -23,7 +23,7 @@ import {
   Database
 } from 'lucide-react';
 import { mockAPI } from '@/lib/mock-api-enhanced';
-import { Collection, MintJob, User, NFTMetadata } from '@/types';
+import { EnhancedCollection, MintJob, User, NFTMetadata, Analytics, Notification } from '@/types';
 
 interface DemoShowcaseProps {
   className?: string;
@@ -31,11 +31,11 @@ interface DemoShowcaseProps {
 
 export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) => {
   const [users, setUsers] = useState<User[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collections, setCollections] = useState<EnhancedCollection[]>([]);
   const [mintJobs, setMintJobs] = useState<MintJob[]>([]);
   const [nftMetadata, setNftMetadata] = useState<NFTMetadata[]>([]);
-  const [analytics, setAnalytics] = useState<any>(null);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -308,7 +308,7 @@ export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) =>
                       <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
                       <div className="flex items-center gap-4 mt-2 text-sm">
                         <span>Symbol: <code className="bg-muted px-1 rounded">{collection.symbol}</code></span>
-                        <span>Supply: {collection.totalSupply}</span>
+                        <span>Supply: {collection.maxNfts}</span>
                         <span>Minted: {collection.mintedCount}</span>
                       </div>
                     </div>
@@ -376,7 +376,7 @@ export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) =>
                       </div>
                       <div>
                         <p className="font-medium">Cost</p>
-                        <p className="text-muted-foreground">{job.actualCost.toFixed(3)} SOL</p>
+                        <p className="text-muted-foreground">{(job.actualCost || 0).toFixed(3)} SOL</p>
                       </div>
                     </div>
                     
@@ -456,9 +456,9 @@ export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) =>
                     <div className="space-y-1">
                       <p className="text-sm font-medium">Attributes:</p>
                       <div className="grid grid-cols-2 gap-1 text-xs">
-                        {Object.entries(nft.attributes).slice(0, 4).map(([key, value]) => (
+                        {Object.entries(nft.attributes).slice(0, 4).map(([key, value]: [string, unknown]) => (
                           <div key={key} className="bg-muted p-1 rounded">
-                            <span className="font-medium">{key}:</span> {value}
+                            <span className="font-medium">{key}:</span> {String(value)}
                           </div>
                         ))}
                       </div>
@@ -517,15 +517,17 @@ export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) =>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {analytics.topCollections.map((collection: any, index: number) => (
+                    {analytics.topCollections.map((collection: { name: string; volume: number; change: string }, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div>
                           <p className="font-medium">{collection.name}</p>
                           <p className="text-sm text-muted-foreground">{collection.volume} SOL volume</p>
                         </div>
-                        <Badge variant={collection.change.startsWith('+') ? 'default' : 'destructive'}>
-                          {collection.change}
-                        </Badge>
+                        {collection.change && (
+                          <Badge variant={collection.change.startsWith('+') ? 'default' : 'destructive'}>
+                            {collection.change}
+                          </Badge>
+                        )}
                       </div>
                     ))}
                   </div>
