@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { WalletProvider } from '@/components/wallet/WalletProvider';
 import { Toaster } from '@/components/ui/sonner';
@@ -14,12 +14,49 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0a0a0a",
+};
+
 export const metadata: Metadata = {
-  title: "cNFT Platform - Compressed NFT Minting",
-  description: "Create and mint compressed NFTs on Solana with ease. Batch mint thousands of NFTs at a fraction of the cost.",
-  keywords: "Solana, cNFT, compressed NFT, minting, blockchain, NFT collection",
-  authors: [{ name: "cNFT Platform" }],
-  viewport: "width=device-width, initial-scale=1",
+  title: {
+    default: "FriendlyMinter - Compressed NFT Minting on Solana",
+    template: "%s | FriendlyMinter",
+  },
+  description:
+    "Create and mint compressed NFTs (cNFTs) on Solana at a fraction of the cost. Batch mint thousands of NFTs with bulk upload, real-time progress tracking, and Merkle tree management.",
+  keywords: [
+    "Solana",
+    "cNFT",
+    "compressed NFT",
+    "minting",
+    "blockchain",
+    "NFT collection",
+    "Metaplex",
+    "bubblegum",
+    "Merkle tree",
+    "web3",
+  ],
+  authors: [{ name: "Piyush (@404Piyush)" }],
+  creator: "Piyush",
+  applicationName: "FriendlyMinter",
+  openGraph: {
+    title: "FriendlyMinter - Compressed NFT Minting on Solana",
+    description:
+      "Batch mint thousands of compressed NFTs on Solana. Cost-efficient, fast, and developer-friendly.",
+    type: "website",
+    siteName: "FriendlyMinter",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FriendlyMinter - Compressed NFT Minting",
+    description: "Batch mint thousands of compressed NFTs on Solana.",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

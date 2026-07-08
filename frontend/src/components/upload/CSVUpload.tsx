@@ -204,7 +204,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           }
 
           // Validate data
-          const validatedData = validateCSVData(results.data);
+          const validatedData = validateCSVData(results.data as Record<string, unknown>[]);
           
           if (validatedData.errors.length > 0) {
             setUploadedFiles(prev => 

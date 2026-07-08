@@ -1,214 +1,260 @@
-'use client';
-
-import React from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  Coins,
   Plus,
   Upload,
   Zap,
-  DollarSign,
-  Users,
-  TrendingUp,
   ArrowRight,
   Sparkles,
+  CheckCircle2,
+  Layers,
+  Wallet,
+  Gauge,
+  ShieldCheck,
+  Rocket,
 } from 'lucide-react';
-import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+
+const features = [
+  {
+    icon: Coins,
+    title: 'Collection Management',
+    description:
+      'Create and manage cNFT collections with custom metadata, royalties, and Merkle-tree-backed storage.',
+    href: '/collections',
+  },
+  {
+    icon: Upload,
+    title: 'Bulk Upload via CSV',
+    description:
+      'Upload thousands of NFT metadata rows at once with a CSV and an image batch processor.',
+    href: '/collections/create',
+  },
+  {
+    icon: Zap,
+    title: 'Job-Queue Minting',
+    description:
+      'Submit mints as background jobs and watch progress in real time with pause/resume controls.',
+    href: '/jobs',
+  },
+  {
+    icon: Layers,
+    title: 'Merkle Tree Engine',
+    description:
+      'Visualise and tune Merkle tree parameters (depth, buffer, canopy) to fit any collection size.',
+    href: '/docs',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Wallet-First Auth',
+    description:
+      'Built on the Solana wallet-adapter stack — Phantom, Solflare, Torus, Ledger all supported.',
+    href: '/docs',
+  },
+  {
+    icon: Gauge,
+    title: 'Devnet-First',
+    description:
+      'Default-configured for Solana devnet so you can experiment end-to-end without risking funds.',
+    href: '/settings',
+  },
+];
+
+const steps = [
+  {
+    num: '01',
+    title: 'Connect',
+    body: 'Connect a Solana wallet (Phantom, Solflare, etc.). FriendlyMinter runs on Solana devnet by default.',
+    icon: Wallet,
+  },
+  {
+    num: '02',
+    title: 'Configure',
+    body: 'Pick collection metadata and Merkle-tree parameters. The UI estimates rent + fees for you.',
+    icon: Layers,
+  },
+  {
+    num: '03',
+    title: 'Mint',
+    body: 'Bulk upload via CSV (or per-NFT), submit a mint job, and watch the on-chain progress live.',
+    icon: Rocket,
+  },
+];
 
 export default function Home() {
   return (
-    <Layout>
-      <div className="space-y-8">
-        {/* Hero Section */}
-        <div className="text-center space-y-4 py-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              cNFT Platform
-            </h1>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/40">
+      <Header />
+
+      <main>
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b">
+          <div className="absolute inset-0 -z-10 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/20 blur-3xl" />
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Create and mint compressed NFTs on Solana at a fraction of the cost.
-            Perfect for large collections, marketing campaigns, and community rewards.
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <Button size="lg" asChild>
-              <Link href="/collections/create">
-                <Plus className="h-5 w-5 mr-2" />
-                Create Collection
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/collections">
-                View Collections
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Link>
-            </Button>
-          </div>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cost Savings</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">99.9%</div>
-              <p className="text-xs text-muted-foreground">
-                vs traditional NFTs
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Speed</CardTitle>
-              <Zap className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">1000+</div>
-              <p className="text-xs text-muted-foreground">
-                NFTs per minute
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Collections</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                created so far
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Network</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                <Badge variant="secondary">Devnet</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Solana blockchain
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+          <div className="container mx-auto px-4 py-20 lg:py-28">
+            <div className="mx-auto max-w-4xl text-center">
+              <Badge variant="secondary" className="mb-6 px-4 py-1.5">
+                <Sparkles className="mr-2 h-3.5 w-3.5" />
+                Compressed NFTs on Solana — 99% cheaper than traditional mints
+              </Badge>
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-primary" />
-                <CardTitle>Create Collections</CardTitle>
-              </div>
-              <CardDescription>
-                Set up your cNFT collection with custom metadata and Merkle tree configuration.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" asChild>
-                <Link href="/collections/create">
-                  Get Started
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-primary" />
-                <CardTitle>Bulk Upload</CardTitle>
-              </div>
-              <CardDescription>
-                Upload thousands of NFT metadata via CSV and batch process images efficiently.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" variant="outline" asChild>
-                <Link href="/upload">
-                  Upload NFTs
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-primary" />
-                <CardTitle>Fast Minting</CardTitle>
-              </div>
-              <CardDescription>
-                Mint compressed NFTs with background job processing and real-time progress tracking.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" variant="outline" asChild>
-                <Link href="/jobs">
-                  View Jobs
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                Mint thousands of NFTs
+                <br />
+                <span className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
+                  without going broke.
+                </span>
+              </h1>
 
-        {/* Getting Started */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Getting Started</CardTitle>
-            <CardDescription>
-              Follow these simple steps to create your first cNFT collection
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-primary font-bold">1</span>
-                </div>
-                <h3 className="font-semibold">Connect Wallet</h3>
-                <p className="text-sm text-muted-foreground">
-                  Connect your Solana wallet to get started
-                </p>
+              <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+                FriendlyMinter is a developer-friendly cNFT platform for Solana. Bulk-upload metadata,
+                spin up a Merkle tree, and stream your mint job — all from a clean, fast UI.
+              </p>
+
+              <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button size="lg" asChild className="h-12 px-6 text-base">
+                  <Link href="/collections/create">
+                    <Plus className="mr-2 h-5 w-5" />
+                    Create a Collection
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="h-12 px-6 text-base">
+                  <Link href="/demo">
+                    Try the interactive demo
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
               </div>
-              
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-primary font-bold">2</span>
-                </div>
-                <h3 className="font-semibold">Create Collection</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set up your collection with metadata and tree configuration
-                </p>
-              </div>
-              
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-primary font-bold">3</span>
-                </div>
-                <h3 className="font-semibold">Mint NFTs</h3>
-                <p className="text-sm text-muted-foreground">
-                  Upload metadata and start minting your compressed NFTs
-                </p>
-              </div>
+
+              <p className="mt-6 text-xs uppercase tracking-wider text-muted-foreground">
+                No signup · No credit card · Uses Solana devnet by default
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section className="border-b bg-muted/30">
+          <div className="container mx-auto grid grid-cols-2 gap-8 px-4 py-12 md:grid-cols-4">
+            <Stat number="99.9%" label="Cheaper than traditional mints" />
+            <Stat number="1,000+" label="NFTs per minute throughput" />
+            <Stat number="100K+" label="Max items per collection" />
+            <Stat number="~3s" label="Avg finalisation per mint" />
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="container mx-auto px-4 py-20">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Everything you need to ship an NFT drop
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              From wallet connection to on-chain settlement — the boring plumbing is already done.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {features.map((f) => (
+              <Link key={f.title} href={f.href} className="group">
+                <Card className="h-full transition-all duration-200 group-hover:-translate-y-1 group-hover:border-primary/50 group-hover:shadow-lg">
+                  <CardHeader>
+                    <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <f.icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle>{f.title}</CardTitle>
+                    <CardDescription>{f.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="border-t bg-muted/30">
+          <div className="container mx-auto px-4 py-20">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                How FriendlyMinter works
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Three steps from zero to a fully-minted collection.
+              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-3">
+              {steps.map((s) => (
+                <div key={s.num} className="relative">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+                    <s.icon className="h-6 w-6" />
+                  </div>
+                  <div className="text-sm font-mono text-primary">{s.num}</div>
+                  <h3 className="mt-1 text-xl font-semibold">{s.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{s.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="container mx-auto px-4 py-20">
+          <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-blue-500/5">
+            <CardContent className="p-10 text-center md:p-16">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Ready to mint your first collection?
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+                Spin up the interactive demo to see exactly what a cNFT mint job looks like end-to-end.
+                No wallet, no real SOL, no risk.
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button size="lg" asChild>
+                  <Link href="/demo">
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Open Demo
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/collections/create">
+                    Start a Collection
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t bg-background">
+          <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground md:flex-row">
+            <div className="flex items-center gap-2">
+              <Coins className="h-4 w-4 text-primary" />
+              <span>FriendlyMinter · Built by Piyush (@404Piyush)</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+              Live on Solana devnet
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+function Stat({ number, label }: { number: string; label: string }) {
+  return (
+    <div className="text-center md:text-left">
+      <div className="text-3xl font-bold tracking-tight md:text-4xl">{number}</div>
+      <div className="mt-1 text-sm text-muted-foreground">{label}</div>
+    </div>
   );
 }

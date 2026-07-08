@@ -136,7 +136,7 @@ export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) =>
               <div>
                 <h3 className="font-semibold text-blue-900">Demo Mode Active</h3>
                 <p className="text-sm text-blue-700">
-                  You're viewing mock data for demonstration purposes. All interactions are simulated.
+                  You&apos;re viewing mock data for demonstration purposes. All interactions are simulated.
                 </p>
               </div>
               <Button 
@@ -517,7 +517,7 @@ export const DemoShowcase: React.FC<DemoShowcaseProps> = ({ className = '' }) =>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {analytics.topCollections.map((collection: { name: string; volume: number; change: string }, index: number) => (
+                    {analytics.topCollections.map((collection: { name: string; volume: number; change?: string }, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div>
                           <p className="font-medium">{collection.name}</p>

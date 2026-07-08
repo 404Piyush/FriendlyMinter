@@ -1,13 +1,14 @@
 // Mock API utilities for development
-import { 
-  mockUsers, 
-  mockCollections, 
-  mockNftMetadata, 
-  mockMintJobs, 
+import {
+  mockUsers,
+  mockCollections,
+  mockNftMetadata,
+  mockMintJobs,
   mockTransactions,
   simulateDelay,
   mockErrors
 } from './mock-data';
+import type { User } from '../types';
 
 // Environment check
 const USE_MOCK_API = process.env.USE_MOCK_API === 'true';
@@ -31,16 +32,23 @@ export class MockAPI {
 
   static async createUser(userData: Record<string, unknown>) {
     if (!USE_MOCK_API) throw new Error('Mock API is disabled');
-    
+
     await simulateDelay(MOCK_DELAY);
-    const newUser = {
+    const newUser: User = {
       id: Date.now().toString(),
-      ...userData,
+      name: String(userData.name ?? ''),
+      email: String(userData.email ?? ''),
+      walletAddress: userData.walletAddress as string | undefined,
+      role: (userData.role as string | undefined) ?? 'user',
+      isActive: true,
+      totalCollections: 0,
+      totalNftsMinted: 0,
+      totalSpent: 0,
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    
-    mockUsers.push(newUser);
+
+    mockUsers.push(newUser as unknown as (typeof mockUsers)[number]);
     return { success: true, data: newUser };
   }
 
@@ -97,7 +105,7 @@ export class MockAPI {
       updatedAt: new Date()
     };
     
-    mockCollections.push(newCollection);
+    mockCollections.push(newCollection as unknown as (typeof mockCollections)[number]);
     return { success: true, data: newCollection };
   }
 
@@ -160,9 +168,9 @@ export class MockAPI {
       updatedAt: new Date()
     }));
     
-    mockNftMetadata.push(...newMetadata);
-    
-    return { 
+    mockNftMetadata.push(...newMetadata as unknown as (typeof mockNftMetadata)[number][]);
+
+    return {
       success: true, 
       data: {
         uploaded: newMetadata.length,
@@ -229,7 +237,7 @@ export class MockAPI {
       updatedAt: new Date()
     };
     
-    mockMintJobs.push(newJob);
+    mockMintJobs.push(newJob as unknown as (typeof mockMintJobs)[number]);
     return { success: true, data: newJob };
   }
 
