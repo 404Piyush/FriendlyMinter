@@ -308,10 +308,11 @@ const treeRows = [
 
 const stackRows = [
   { title: 'Framework', libs: 'Next.js 15 (App Router) + React 19' },
-  { title: 'Language', libs: 'TypeScript, strict mode' },
+  { title: 'Language', libs: 'TypeScript' },
+  { title: 'Type checking', libs: 'strict mode (tsconfig.json)' },
   { title: 'Styling', libs: 'Tailwind CSS v4' },
   { title: 'Solana', libs: '@solana/wallet-adapter, @solana/web3.js' },
-  { title: 'State', libs: 'Zustand (client) · TanStack Query (server)' },
+  { title: 'State', libs: 'Zustand (client), TanStack Query (server)' },
   { title: 'Forms', libs: 'React Hook Form + Zod' },
   { title: 'Toasts', libs: 'Sonner' },
   { title: 'UI primitives', libs: 'Custom shadcn-style components in src/components/ui' },
