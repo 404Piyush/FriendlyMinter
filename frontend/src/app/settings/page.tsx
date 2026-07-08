@@ -4,189 +4,169 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Wallet, Network, Bell, Shield, Info, ExternalLink } from 'lucide-react';
+import { Settings, Wallet, Network, Bell, Shield, Info, ExternalLink, ArrowUpRight, CircleDot } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative z-10">
       <Header />
 
-      <main className="container mx-auto max-w-4xl px-4 py-12">
-        <div className="mb-8">
-          <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <Settings className="h-4 w-4" />
-            Settings
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Workspace Settings</h1>
-          <p className="mt-2 text-muted-foreground">
+      <main className="container mx-auto max-w-4xl px-4 pt-12 pb-24">
+        <div className="mb-10 border-b border-border pb-6">
+          <p className="label">§Settings</p>
+          <h1 className="display mt-3 text-5xl md:text-6xl">Workspace settings.</h1>
+          <p className="mt-3 max-w-xl text-muted-foreground">
             Configure how FriendlyMinter connects to Solana and behaves in your browser.
           </p>
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Network className="h-5 w-5 text-primary" />
-                Solana Network
-              </CardTitle>
-              <CardDescription>
-                Choose which Solana network mints should target. The active configuration is read by
-                the wallet adapter on load.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3 md:grid-cols-3">
-                <NetworkOption label="Devnet" active description="Free SOL via faucet. Recommended for testing." />
-                <NetworkOption label="Testnet" active={false} description="Reserved for validator stress tests." />
-                <NetworkOption label="Mainnet" active={false} description="Real SOL. Don't enable until you're ready." />
-              </div>
-
-              <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-                <div className="flex items-start gap-2">
-                  <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div>
-                    Network is configured via <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">NEXT_PUBLIC_SOLANA_NETWORK</code>{' '}
-                    at build time. Rebuild the app to switch clusters.
+        <div className="space-y-px bg-border">
+          <Section
+            icon={Network}
+            number="01"
+            title="Solana network"
+            hint="Read at build time by the wallet adapter."
+          >
+            <div className="grid gap-px bg-border md:grid-cols-3">
+              {[
+                { label: 'Devnet', active: true, body: 'Free SOL via faucet. Recommended.' },
+                { label: 'Testnet', active: false, body: 'Validator stress tests.' },
+                { label: 'Mainnet', active: false, body: 'Real SOL. Ship when ready.' },
+              ].map((net) => (
+                <button
+                  key={net.label}
+                  type="button"
+                  className={`group flex flex-col items-start gap-2 bg-background p-5 text-left transition-colors ${
+                    net.active ? 'bg-primary/10 outline outline-1 outline-primary' : 'hover:bg-secondary/40'
+                  }`}
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <span className="font-serif text-xl font-medium">{net.label}</span>
+                    {net.active && <Badge>Active</Badge>}
                   </div>
+                  <p className="text-sm text-muted-foreground">{net.body}</p>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6 flex items-start gap-3 border border-border bg-secondary/40 p-4">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Network is configured via{' '}
+                <code className="rounded-[2px] bg-background px-1.5 py-0.5 font-mono text-[11px] text-foreground">
+                  NEXT_PUBLIC_SOLANA_NETWORK
+                </code>{' '}
+                at build time. Rebuild to switch clusters.
+              </p>
+            </div>
+          </Section>
+
+          <Section
+            icon={Wallet}
+            number="02"
+            title="RPC endpoint"
+            hint="Override the public/ankr RPC. Use a private provider for production."
+          >
+            <Label htmlFor="rpc">Custom RPC URL</Label>
+            <Input
+              id="rpc"
+              placeholder="https://your-helius-url.com/v0?api-key=…"
+              defaultValue="https://api.devnet.solana.com"
+              className="mt-2 font-mono"
+            />
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Blank → defaults to Ankr
+            </p>
+
+            <div className="mt-5">
+              <Label htmlFor="commitment">Commitment</Label>
+              <Input id="commitment" defaultValue="confirmed" className="mt-2 font-mono" />
+            </div>
+          </Section>
+
+          <Section icon={Bell} number="03" title="Notifications" hint="How you find out when jobs complete.">
+            <div className="space-y-px bg-border">
+              {[
+                { label: 'In-app toasts', body: 'Use the Sonner toast stack.', def: true },
+                { label: 'Browser notifications', body: 'Allow FriendlyMinter to push OS notifications.', def: false },
+                { label: 'Email digests', body: 'Daily summary of completed jobs.', def: false },
+              ].map((t) => (
+                <div key={t.label} className="flex items-center justify-between gap-4 bg-background p-4">
+                  <div>
+                    <div className="font-medium">{t.label}</div>
+                    <p className="text-sm text-muted-foreground">{t.body}</p>
+                  </div>
+                  <ToggleSwitch defaultChecked={t.def} />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Wallet className="h-5 w-5 text-primary" />
-                RPC Endpoint
-              </CardTitle>
-              <CardDescription>
-                Override the default Ankr/public RPC. Public endpoints are rate-limited — for production
-                use a private provider (Helius, Triton, QuickNode).
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <Label htmlFor="rpc">Custom RPC URL</Label>
-                <Input
-                  id="rpc"
-                  placeholder="https://your-helius-url.com/v0?api-key=…"
-                  defaultValue="https://api.devnet.solana.com"
-                  className="mt-1.5"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Leave blank to use the default Ankr endpoint.
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="commitment">Commitment</Label>
-                <Input
-                  id="commitment"
-                  defaultValue="confirmed"
-                  className="mt-1.5"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-primary" />
-                Notifications
-              </CardTitle>
-              <CardDescription>How you want to know when jobs complete.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Toggle label="In-app toasts" description="Use the Sonner toast stack." defaultChecked />
-              <Toggle label="Browser notifications" description="Allow FriendlyMinter to push OS notifications." />
-              <Toggle label="Email digests" description="Daily summary of completed jobs." />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                Privacy & Security
-              </CardTitle>
-              <CardDescription>Your wallet keys never leave your browser.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-sm">
-                <div className="font-medium text-green-600">Read-only by default</div>
+          <Section
+            icon={Shield}
+            number="04"
+            title="Privacy & security"
+            hint="Your wallet keys never leave the browser."
+          >
+            <div className="flex items-start gap-3 border border-success/30 bg-success/5 p-4">
+              <CircleDot className="mt-0.5 h-4 w-4 shrink-0 text-success live-dot" />
+              <div className="text-sm">
+                <div className="font-medium text-success">Read-only by default</div>
                 <p className="mt-1 text-muted-foreground">
                   FriendlyMinter signs mint transactions locally via your wallet. We never see your keys.
                 </p>
               </div>
-              <Button variant="outline" asChild>
-                <a
-                  href="https://docs.metaplex.com/programs/token-metadata/bubblegum"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Read Bubblegum docs <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
+            <Button variant="outline" asChild className="mt-5">
+              <a
+                href="https://docs.metaplex.com/programs/token-metadata/bubblegum"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Read Bubblegum docs <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </Section>
         </div>
       </main>
     </div>
   );
 }
 
-function NetworkOption({
-  label,
-  description,
-  active,
+function Section({
+  icon: Icon,
+  number,
+  title,
+  hint,
+  children,
 }: {
-  label: string;
-  description: string;
-  active?: boolean;
+  icon: React.ComponentType<{ className?: string }>;
+  number: string;
+  title: string;
+  hint: string;
+  children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      className={`rounded-lg border p-4 text-left transition-all ${
-        active ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'hover:border-primary/50'
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="font-medium">{label}</span>
-        {active && <Badge>Active</Badge>}
+    <section className="bg-background p-6 md:p-8">
+      <div className="mb-5 flex items-baseline gap-3">
+        <span className="font-mono text-sm text-primary">{number}</span>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <h3 className="font-serif text-2xl font-medium tracking-tight">{title}</h3>
       </div>
-      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-    </button>
+      <p className="mb-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{hint}</p>
+      {children}
+    </section>
   );
 }
 
-function Toggle({
-  label,
-  description,
-  defaultChecked,
-}: {
-  label: string;
-  description: string;
-  defaultChecked?: boolean;
-}) {
+function ToggleSwitch({ defaultChecked }: { defaultChecked?: boolean }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border p-3">
-      <div className="pr-4">
-        <div className="font-medium">{label}</div>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-      <label className="inline-flex cursor-pointer items-center">
-        <input
-          type="checkbox"
-          defaultChecked={defaultChecked}
-          className="peer sr-only"
-        />
-        <span className="relative h-6 w-11 rounded-full bg-muted transition-colors peer-checked:bg-primary">
-          <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform peer-checked:translate-x-5" />
-        </span>
-      </label>
-    </div>
+    <label className="relative inline-flex h-6 w-11 cursor-pointer items-center">
+      <input type="checkbox" defaultChecked={defaultChecked} className="peer sr-only" />
+      <span
+        className={`absolute inset-0 rounded-[2px] border border-border bg-secondary transition-colors peer-checked:border-primary peer-checked:bg-primary`}
+      />
+      <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-[2px] bg-foreground transition-transform peer-checked:translate-x-5 peer-checked:bg-primary-foreground" />
+    </label>
   );
 }

@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { Button } from '@/components/ui/button';
-import { Wallet, LogOut } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { Button } from "@/components/ui/button";
+import { LogOut, Wallet, ChevronDown } from "lucide-react";
 
 interface WalletButtonProps {
-  variant?: 'default' | 'outline' | 'ghost';
-  size?: 'sm' | 'default' | 'lg';
+  variant?: "default" | "outline" | "ghost";
+  size?: "sm" | "default" | "lg";
   className?: string;
 }
 
 export const WalletButton: React.FC<WalletButtonProps> = ({
-  variant = 'default',
-  size = 'default',
-  className = '',
+  variant = "default",
+  size = "default",
+  className = "",
 }) => {
   const { connected, connecting, disconnect, publicKey } = useWallet();
   const [mounted, setMounted] = useState(false);
@@ -27,26 +27,27 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
   if (!mounted) {
     return (
       <Button variant={variant} size={size} className={className} disabled>
-        <Wallet className="h-4 w-4" />
-        Loading...
+        Loading…
       </Button>
     );
   }
 
   if (connected && publicKey) {
+    const pk = publicKey.toString();
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        <span className="text-sm text-muted-foreground">
-          {publicKey.toString().slice(0, 4)}...{publicKey.toString().slice(-4)}
-        </span>
+      <div className={`flex items-center gap-1.5 ${className}`}>
+        <div className="flex items-center gap-2 rounded-[3px] border border-border bg-secondary px-3 py-1.5 font-mono text-xs">
+          <span className="h-1.5 w-1.5 rounded-full bg-success live-dot" />
+          {pk.slice(0, 4)}…{pk.slice(-4)}
+        </div>
         <Button
-          variant="outline"
-          size={size}
+          variant="ghost"
+          size="icon"
           onClick={disconnect}
-          className="flex items-center gap-2"
+          aria-label="Disconnect"
+          className="text-muted-foreground hover:text-destructive"
         >
           <LogOut className="h-4 w-4" />
-          Disconnect
         </Button>
       </div>
     );
@@ -55,23 +56,23 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
   return (
     <WalletMultiButton
       className={`
-        !bg-primary !text-primary-foreground hover:!bg-primary/90
-        !border-0 !rounded-md !font-medium !transition-colors
-        !flex !items-center !gap-2 !px-4 !py-2
-        ${size === 'sm' ? '!text-sm !px-3 !py-1.5' : ''}
-        ${size === 'lg' ? '!text-lg !px-6 !py-3' : ''}
+        !bg-primary !text-primary-foreground hover:!bg-primary/85
+        !border-0 !rounded-[3px] !font-medium !transition-colors
+        !flex !items-center !gap-2 !px-3.5 !h-10 !text-sm
+        ${size === "sm" ? "!text-xs !h-8" : ""}
+        ${size === "lg" ? "!text-base !h-12 !px-5" : ""}
         ${className}
       `}
     >
       {connecting ? (
         <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          Connecting...
+          <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+          Connecting
         </>
       ) : (
         <>
           <Wallet className="h-4 w-4" />
-          Connect Wallet
+          Connect
         </>
       )}
     </WalletMultiButton>

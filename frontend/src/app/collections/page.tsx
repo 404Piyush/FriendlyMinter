@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ArrowRight, FolderOpen, Coins, Sparkles } from 'lucide-react';
+import { Plus, ArrowRight, FolderOpen, ArrowUpRight, Sparkles, Activity, Hexagon } from 'lucide-react';
 
 const sampleCollections = [
   {
@@ -15,9 +14,10 @@ const sampleCollections = [
     minted: 642,
     max: 1000,
     merkleTree: '8xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-    image: '🎨',
+    image: 'GPX',
     depth: 14,
     buffer: 64,
+    accent: 'bg-primary text-primary-foreground',
   },
   {
     id: 'demo-collection-02',
@@ -28,9 +28,10 @@ const sampleCollections = [
     minted: 0,
     max: 5000,
     merkleTree: '6rY9Tg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-    image: '👑',
+    image: 'DGL',
     depth: 17,
     buffer: 64,
+    accent: 'bg-accent text-accent-foreground',
   },
   {
     id: 'demo-collection-03',
@@ -41,125 +42,140 @@ const sampleCollections = [
     minted: 2500,
     max: 2500,
     merkleTree: '3aP7Tg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-    image: '🧾',
+    image: 'RCPT',
     depth: 14,
     buffer: 64,
+    accent: 'bg-secondary text-secondary-foreground',
   },
 ];
 
-const statusColor: Record<string, string> = {
-  COMPLETED: 'bg-green-500',
-  MINTING: 'bg-blue-500 animate-pulse',
-  INITIALIZED: 'bg-yellow-500',
-  DRAFT: 'bg-gray-500',
-  FAILED: 'bg-red-500',
+const statusConfig: Record<string, { label: string; variant: 'success' | 'default' | 'secondary' | 'destructive' | 'muted' }> = {
+  COMPLETED: { label: 'Completed', variant: 'success' },
+  MINTING: { label: 'Minting', variant: 'default' },
+  INITIALIZED: { label: 'Initialized', variant: 'secondary' },
+  DRAFT: { label: 'Draft', variant: 'muted' },
+  FAILED: { label: 'Failed', variant: 'destructive' },
 };
 
 export default function CollectionsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative z-10">
       <Header />
 
-      <main className="container mx-auto px-4 py-12">
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <main className="container mx-auto px-4 pt-12 pb-24">
+        <div className="mb-10 flex flex-col items-start justify-between gap-6 border-b border-border pb-6 md:flex-row md:items-end">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-              <FolderOpen className="h-4 w-4" />
-              Collections
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Your Collections</h1>
-            <p className="mt-2 text-muted-foreground">
-              Manage your cNFT collections. Click any card to inspect, edit or mint.
+            <p className="label">§Collections · {sampleCollections.length} entries</p>
+            <h1 className="display mt-3 text-5xl md:text-6xl">Your cNFT collections.</h1>
+            <p className="mt-3 max-w-xl text-muted-foreground">
+              Manage and inspect your collections. Click a card for on-chain config + mint progress.
             </p>
           </div>
-          <Button asChild size="lg">
+          <Button size="lg" asChild>
             <Link href="/collections/create">
-              <Plus className="mr-2 h-5 w-5" />
-              New Collection
+              <Plus className="h-4 w-4" strokeWidth={2.5} />
+              New collection
             </Link>
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
           {sampleCollections.map((c) => (
-            <Link key={c.id} href={`/collections/${c.id}`} className="group">
-              <Card className="h-full transition-all duration-200 group-hover:-translate-y-1 group-hover:border-primary/50 group-hover:shadow-lg">
-                <CardHeader>
-                  <div className="mb-3 flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-blue-500/10 text-6xl">
-                    {c.image}
-                  </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="truncate">{c.name}</CardTitle>
-                      <CardDescription className="truncate">{c.symbol}</CardDescription>
-                    </div>
-                    <Badge variant="secondary" className="shrink-0">
-                      <span className={`mr-1.5 inline-block h-2 w-2 rounded-full ${statusColor[c.status] ?? 'bg-gray-500'}`} />
-                      {c.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="line-clamp-2 text-sm text-muted-foreground">{c.description}</p>
+            <Link
+              key={c.id}
+              href={`/collections/${c.id}`}
+              className="group relative flex flex-col bg-background p-6 transition-colors hover:bg-secondary/30"
+            >
+              <div className="mb-5 flex items-start justify-between">
+                <div className={`flex h-14 w-14 items-center justify-center rounded-[3px] font-mono text-sm font-semibold tracking-wider ${c.accent}`}>
+                  {c.image}
+                </div>
+                <Badge variant={statusConfig[c.status]?.variant ?? 'muted'}>
+                  {statusConfig[c.status]?.label ?? c.status}
+                </Badge>
+              </div>
 
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Minted</span>
-                      <span>
-                        {c.minted.toLocaleString()} / {c.max.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary to-blue-500 transition-all"
-                        style={{ width: `${Math.min(100, (c.minted / c.max) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-serif text-2xl font-medium leading-tight tracking-tight">
+                    {c.name}
+                  </h3>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {c.symbol}
+                  </p>
+                </div>
+                <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+              </div>
 
-                  <div className="flex items-center justify-between border-t pt-3 text-xs text-muted-foreground">
-                    <span>Depth {c.depth}</span>
-                    <span>Buffer {c.buffer}</span>
-                  </div>
-                </CardContent>
-              </Card>
+              <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                {c.description}
+              </p>
+
+              <div className="mt-6 space-y-2.5">
+                <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span>minted</span>
+                  <span className="text-foreground">
+                    {c.minted.toLocaleString()} / {c.max.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-1 overflow-hidden bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${Math.min(100, (c.minted / c.max) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center gap-4 border-t border-border pt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <span>depth {c.depth}</span>
+                <span className="text-border">/</span>
+                <span>buffer {c.buffer}</span>
+                <span className="text-border">/</span>
+                <span className="ml-auto truncate">{c.merkleTree.slice(0, 4)}…{c.merkleTree.slice(-4)}</span>
+              </div>
             </Link>
           ))}
 
+          {/* Create new tile */}
           <Link
             href="/collections/create"
-            className="group flex min-h-[280px] items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/20 transition-all hover:border-primary/50 hover:bg-primary/5"
+            className="group relative flex min-h-[360px] flex-col items-start justify-between border-2 border-dashed border-border bg-transparent p-6 transition-colors hover:border-primary hover:bg-primary/5"
           >
-            <div className="text-center">
-              <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                <Plus className="h-6 w-6" />
+            <div className="mb-5 flex items-start justify-between">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[3px] border-2 border-dashed border-border text-muted-foreground">
+                <Plus className="h-5 w-5" strokeWidth={2} />
               </div>
-              <p className="font-medium">Create new collection</p>
-              <p className="mt-1 text-sm text-muted-foreground">Spin up a Merkle tree in seconds</p>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+            </div>
+            <div>
+              <h3 className="font-serif text-2xl font-medium tracking-tight">Create new collection</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Spin up a Merkle tree in seconds. Default parameters handle up to 100K items.
+              </p>
             </div>
           </Link>
         </div>
 
-        <Card className="mt-12 border-dashed">
-          <CardContent className="flex flex-col items-center justify-between gap-4 p-8 sm:flex-row">
-            <div className="flex items-start gap-4">
-              <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">See it in action with mock data</h3>
-                <p className="text-sm text-muted-foreground">
-                  The interactive demo simulates the full mint flow without spending devnet SOL.
-                </p>
-              </div>
+        {/* CTA */}
+        <div className="mt-16 flex flex-col items-start gap-6 border border-border p-6 md:flex-row md:items-center md:justify-between md:gap-8">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[3px] bg-primary/10 text-primary">
+              <Activity className="h-4 w-4" />
             </div>
-            <Button asChild variant="outline">
-              <Link href="/demo">
-                Open demo <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="label">Demo mode</p>
+              <h3 className="mt-1 font-serif text-xl tracking-tight">Try the full flow without spending SOL.</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Mock data simulates on-chain settlement. Cost estimates and progress work the same way.
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" asChild className="shrink-0">
+            <Link href="/demo">
+              Open demo <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </main>
     </div>
   );

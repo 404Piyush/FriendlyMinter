@@ -1,116 +1,119 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { WalletButton } from '@/components/wallet/WalletButton';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Coins, Plus, FileText, Settings, TestTube } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { WalletButton } from "@/components/wallet/WalletButton";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, Coins, Plus, FileText, Settings, TestTube, ArrowUpRight, Activity, LayoutGrid } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const navigation = [
-  {
-    name: 'Dashboard',
-    href: '/',
-    icon: Coins,
-  },
-  {
-    name: 'Collections',
-    href: '/collections',
-    icon: FileText,
-  },
-  {
-    name: 'Create Collection',
-    href: '/collections/create',
-    icon: Plus,
-  },
-  {
-    name: 'Demo',
-    href: '/demo',
-    icon: TestTube,
-  },
-  {
-    name: 'Settings',
-    href: '/settings',
-    icon: Settings,
-  },
+  { name: "Dashboard", href: "/", icon: LayoutGrid, code: "00" },
+  { name: "Collections", href: "/collections", icon: FileText, code: "01" },
+  { name: "Create", href: "/collections/create", icon: Plus, code: "02" },
+  { name: "Jobs", href: "/jobs", icon: Activity, code: "03" },
+  { name: "Demo", href: "/demo", icon: TestTube, code: "04" },
+  { name: "Docs", href: "/docs", icon: ArrowUpRight, code: "05" },
 ];
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-14 items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2">
-            <Coins className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">cNFT Platform</span>
-          </Link>
-        </div>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-7 w-7 items-center justify-center rounded-[3px] bg-primary text-primary-foreground">
+            <Coins className="h-4 w-4" strokeWidth={2.5} />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="font-serif text-lg font-medium leading-none tracking-tight">
+              FriendlyMinter
+            </span>
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:inline">
+              v0.3 · devnet
+            </span>
+          </div>
+        </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        {/* Desktop nav */}
+        <nav className="hidden items-center gap-1 md:flex">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
+                  "group flex items-center gap-2 rounded-[3px] px-3 py-1.5 text-sm transition-colors",
                   isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                 )}
               >
-                <Icon className="h-4 w-4" />
-                {item.name}
+                <span className="font-mono text-[10px] text-muted-foreground/60 group-hover:text-primary">
+                  {item.code}
+                </span>
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Wallet Connection */}
-        <div className="flex items-center gap-4">
+        {/* Right side: wallet + mobile menu */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            className="hidden h-9 w-9 items-center justify-center rounded-[3px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:flex"
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Link>
           <WalletButton />
-          
-          {/* Mobile Menu */}
+
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <nav className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 pb-4 border-b">
-                  <Coins className="h-6 w-6 text-primary" />
-                  <span className="font-bold text-xl">cNFT Platform</span>
+            <SheetContent
+              side="right"
+              className="w-[320px] border-l border-border bg-background p-0"
+            >
+              <div className="border-b border-border p-5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-[3px] bg-primary text-primary-foreground">
+                    <Coins className="h-4 w-4" strokeWidth={2.5} />
+                  </div>
+                  <span className="font-serif text-lg font-medium">FriendlyMinter</span>
                 </div>
-                
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Compressed NFT platform · devnet
+                </p>
+              </div>
+              <nav className="flex flex-col p-3">
                 {navigation.map((item) => {
-                  const Icon = item.icon;
                   const isActive = pathname === item.href;
-                  
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent',
+                        "flex items-center justify-between gap-2 rounded-[3px] px-3 py-2.5 text-sm transition-colors",
                         isActive
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                       )}
                     >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
+                      <span>{item.name}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground/60">
+                        {item.code}
+                      </span>
                     </Link>
                   );
                 })}

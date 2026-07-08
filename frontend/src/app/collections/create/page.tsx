@@ -18,6 +18,8 @@ import {
   Sparkles,
   Info,
   Layers,
+  ArrowUpRight,
+  Hash,
 } from 'lucide-react';
 
 interface TreeParams {
@@ -56,6 +58,7 @@ export default function CreateCollectionPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const cost = estimateCost(params.maxDepth, params.maxBufferSize, numNfts);
+  const savingsVsLegacy = numNfts * 0.012;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,220 +76,196 @@ export default function CreateCollectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative z-10">
       <Header />
 
-      <main className="container mx-auto max-w-5xl px-4 py-12">
-        <Button variant="ghost" asChild className="mb-6">
-          <Link href="/collections">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Collections
-          </Link>
-        </Button>
+      <main className="container mx-auto max-w-6xl px-4 pt-12 pb-24">
+        <Link
+          href="/collections"
+          className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          Back to collections
+        </Link>
 
-        <div className="mb-8">
-          <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <Coins className="h-4 w-4" />
-            New Collection
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Create a cNFT Collection</h1>
-          <p className="mt-2 text-muted-foreground">
-            Configure metadata + Merkle-tree parameters. Cost estimate updates live.
+        <div className="mb-10 border-b border-border pb-6">
+          <p className="label">§Create · New entry</p>
+          <h1 className="display mt-3 text-5xl md:text-6xl">
+            New cNFT<br />
+            <span className="italic text-primary">collection</span>.
+          </h1>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            Configure metadata and Merkle-tree parameters. The cost panel reacts as you type.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Metadata</CardTitle>
-                <CardDescription>Basic on-chain metadata for your collection.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="Solana Genesis Pixels"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="mt-1.5"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="symbol">Symbol</Label>
-                    <Input
-                      id="symbol"
-                      placeholder="GPX"
-                      maxLength={10}
-                      value={symbol}
-                      onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                      className="mt-1.5"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="A short description of the collection…"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="mt-1.5 min-h-[100px]"
+        <form onSubmit={handleSubmit} className="grid gap-px bg-border lg:grid-cols-3">
+          <div className="space-y-px bg-border lg:col-span-2">
+            <Section number="01" title="Metadata" hint="Basic on-chain metadata for your collection.">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="md:col-span-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Solana Genesis Pixels"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="mt-2"
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="image">Cover Image URL</Label>
+                  <Label htmlFor="symbol">Symbol</Label>
                   <Input
-                    id="image"
-                    placeholder="https://…/cover.png  (IPFS, Arweave, or HTTPS)"
-                    className="mt-1.5"
+                    id="symbol"
+                    placeholder="GPX"
+                    maxLength={10}
+                    value={symbol}
+                    onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                    className="mt-2"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Recommended 1200×630. We auto-detect IPFS / Arweave gateways.
-                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-primary" />
-                  Merkle Tree Configuration
-                </CardTitle>
-                <CardDescription>
-                  Pick a preset or tune parameters. The tree is created on-chain when you submit.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-                  {TREE_PRESETS.map((p) => (
-                    <button
-                      key={p.label}
-                      type="button"
-                      onClick={() => setParams(p.params)}
-                      className={`rounded-lg border px-3 py-2 text-left transition-all ${
-                        params.maxDepth === p.params.maxDepth
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="text-sm font-medium">{p.label}</div>
-                      <div className="text-xs text-muted-foreground">{p.capacity}</div>
-                    </button>
-                  ))}
-                </div>
+              <div className="mt-5">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="A short description of the collection…"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="mt-2 min-h-[100px]"
+                />
+              </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div>
-                    <Label>Max Depth</Label>
-                    <Input
-                      type="number"
-                      min={3}
-                      max={30}
-                      value={params.maxDepth}
-                      onChange={(e) => setParams((p) => ({ ...p, maxDepth: Number(e.target.value) }))}
-                      className="mt-1.5"
-                    />
-                  </div>
-                  <div>
-                    <Label>Max Buffer Size</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={2048}
-                      value={params.maxBufferSize}
-                      onChange={(e) => setParams((p) => ({ ...p, maxBufferSize: Number(e.target.value) }))}
-                      className="mt-1.5"
-                    />
-                  </div>
-                  <div>
-                    <Label>Canopy Depth</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={20}
-                      value={params.canopyDepth}
-                      onChange={(e) => setParams((p) => ({ ...p, canopyDepth: Number(e.target.value) }))}
-                      className="mt-1.5"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <div className="mt-5">
+                <Label htmlFor="image">Cover image URL</Label>
+                <Input
+                  id="image"
+                  placeholder="https://…/cover.png  (IPFS, Arweave, or HTTPS)"
+                  className="mt-2"
+                />
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Recommended 1200×630 · auto-detects IPFS / Arweave gateways
+                </p>
+              </div>
+            </Section>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Mint Volume</CardTitle>
-                <CardDescription>How many cNFTs do you plan to issue?</CardDescription>
-              </CardHeader>
-              <CardContent>
+            <Section number="02" title="Merkle tree" hint="Pick a preset or tune parameters.">
+              <div className="mb-5 grid grid-cols-2 gap-px bg-border md:grid-cols-5">
+                {TREE_PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => setParams(p.params)}
+                    className={`flex flex-col items-start gap-1 bg-background p-3 text-left transition-colors ${
+                      params.maxDepth === p.params.maxDepth
+                        ? 'bg-primary/10 outline outline-1 outline-primary'
+                        : 'hover:bg-secondary/40'
+                    }`}
+                  >
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      Preset
+                    </span>
+                    <span className="font-serif text-base font-medium">{p.label}</span>
+                    <span className="font-mono text-[10px] text-primary">{p.capacity}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <Label htmlFor="num">Number of NFTs</Label>
+                  <Label>Max depth</Label>
                   <Input
-                    id="num"
+                    type="number"
+                    min={3}
+                    max={30}
+                    value={params.maxDepth}
+                    onChange={(e) => setParams((p) => ({ ...p, maxDepth: Number(e.target.value) }))}
+                    className="mt-2 font-mono"
+                  />
+                </div>
+                <div>
+                  <Label>Max buffer size</Label>
+                  <Input
                     type="number"
                     min={1}
-                    value={numNfts}
-                    onChange={(e) => setNumNfts(Number(e.target.value))}
-                    className="mt-1.5"
+                    max={2048}
+                    value={params.maxBufferSize}
+                    onChange={(e) => setParams((p) => ({ ...p, maxBufferSize: Number(e.target.value) }))}
+                    className="mt-2 font-mono"
                   />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <Label>Canopy depth</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={20}
+                    value={params.canopyDepth}
+                    onChange={(e) => setParams((p) => ({ ...p, canopyDepth: Number(e.target.value) }))}
+                    className="mt-2 font-mono"
+                  />
+                </div>
+              </div>
+            </Section>
+
+            <Section number="03" title="Mint volume" hint="How many cNFTs do you plan to issue?">
+              <Input
+                type="number"
+                min={1}
+                value={numNfts}
+                onChange={(e) => setNumNfts(Number(e.target.value))}
+                className="font-mono"
+              />
+            </Section>
           </div>
 
-          {/* Sidebar: live cost estimate */}
-          <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5 text-primary" />
-                  Cost estimate
-                </CardTitle>
-                <CardDescription>Solana devnet — paid in SOL.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <Row label="Tree + accounts rent" value={`${cost.rent.toFixed(4)} SOL`} />
-                <Row label={`${numNfts.toLocaleString()} mint fees`} value={`${cost.mint.toFixed(4)} SOL`} />
-                <Row label="Compression fees" value={`${cost.compression.toFixed(4)} SOL`} />
-                <div className="border-t pt-3">
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-semibold">Total</span>
-                    <span className="text-2xl font-bold text-primary">
-                      {cost.total.toFixed(4)} SOL
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    vs traditional minting: ~{(numNfts * 0.012).toFixed(2)} SOL
-                  </p>
-                  <Badge variant="secondary" className="mt-2">
-                    <Sparkles className="mr-1 h-3 w-3" /> ~99% cheaper
-                  </Badge>
+          {/* Sidebar: cost + submit */}
+          <aside className="space-y-px bg-border lg:sticky lg:top-20 lg:self-start">
+            <div className="bg-card p-6">
+              <p className="label">Cost estimate · SOL</p>
+              <div className="mt-4 display text-5xl text-primary">{cost.total.toFixed(4)}</div>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                devnet · updated live
+              </p>
+
+              <div className="mt-6 space-y-3 border-t border-border pt-4 text-sm">
+                <Row k="Tree + accounts rent" v={`${cost.rent.toFixed(4)} SOL`} />
+                <Row k={`${numNfts.toLocaleString()} mint fees`} v={`${cost.mint.toFixed(4)} SOL`} />
+                <Row k="Compression" v={`${cost.compression.toFixed(4)} SOL`} />
+              </div>
+
+              <div className="mt-6 border-t border-border pt-4">
+                <div className="flex items-baseline justify-between">
+                  <span className="label">vs legacy mint</span>
+                  <Badge variant="success">-99%</Badge>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-blue-500/20 bg-blue-500/5">
-              <CardContent className="flex gap-3 p-4">
-                <Info className="h-5 w-5 shrink-0 text-blue-500" />
-                <p className="text-sm text-muted-foreground">
-                  Submitting creates an on-chain Merkle tree on devnet. Use the
-                  {' '}<span className="font-mono text-foreground">Solana Faucet</span> to fund your wallet
-                  with devnet SOL before submitting.
+                <p className="mt-2 font-mono text-xs text-muted-foreground">
+                  You&apos;d spend {savingsVsLegacy.toFixed(2)} SOL on a standard mint.
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Create Collection'}
+            <div className="flex items-start gap-3 bg-primary/5 p-4">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Submitting creates an on-chain Merkle tree on devnet. Use the{' '}
+                <span className="font-mono text-foreground">Solana Faucet</span> to fund your wallet
+                with devnet SOL first.
+              </p>
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={submitting}
+            >
+              {submitting ? 'Submitting…' : 'Create collection'}
+              <ArrowUpRight className="h-4 w-4" />
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              Form is in demo mode — values are not persisted.
+            <p className="bg-background p-4 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Demo mode · values not persisted
             </p>
           </aside>
         </form>
@@ -295,11 +274,38 @@ export default function CreateCollectionPage() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Section({
+  number,
+  title,
+  hint,
+  children,
+}: {
+  number: string;
+  title: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-background p-6 md:p-8">
+      <div className="mb-5 flex items-baseline justify-between gap-4">
+        <h3 className="flex items-baseline gap-3 font-serif text-2xl font-medium tracking-tight">
+          <span className="font-mono text-sm text-primary">{number}</span>
+          {title}
+        </h3>
+        <p className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground md:block">
+          {hint}
+        </p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono text-foreground">{value}</span>
+      <span className="text-muted-foreground">{k}</span>
+      <span className="font-mono text-foreground">{v}</span>
     </div>
   );
 }

@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Activity, ArrowRight, Clock, CheckCircle2, AlertCircle, Play, Pause } from 'lucide-react';
+import { Activity, ArrowUpRight, Clock, CheckCircle2, AlertCircle, Play, Pause } from 'lucide-react';
 
 const jobs = [
   {
-    id: 'job-001',
+    id: 'JOB-0001',
     collection: 'Solana Genesis Pixels',
     status: 'PROCESSING',
     minted: 642,
@@ -18,7 +18,7 @@ const jobs = [
     cost: '0.0063 SOL',
   },
   {
-    id: 'job-002',
+    id: 'JOB-0002',
     collection: 'On-chain Receipts',
     status: 'COMPLETED',
     minted: 2500,
@@ -28,7 +28,7 @@ const jobs = [
     cost: '0.0187 SOL',
   },
   {
-    id: 'job-003',
+    id: 'JOB-0003',
     collection: 'DeGods Lite',
     status: 'PENDING',
     minted: 0,
@@ -39,55 +39,64 @@ const jobs = [
   },
 ];
 
+const STATUS_VARIANT: Record<
+  string,
+  { cls: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  PROCESSING: { cls: 'border-primary/40 bg-primary/15 text-primary', icon: Activity },
+  COMPLETED: { cls: 'border-success/40 bg-success/15 text-success', icon: CheckCircle2 },
+  PENDING: { cls: 'border-muted-foreground/40 bg-secondary text-muted-foreground', icon: Clock },
+  FAILED: { cls: 'border-destructive/40 bg-destructive/15 text-destructive', icon: AlertCircle },
+};
+
 export default function JobsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative z-10">
       <Header />
 
-      <main className="container mx-auto px-4 py-12">
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <main className="container mx-auto px-4 pt-12 pb-24">
+        <div className="mb-10 flex flex-col items-start justify-between gap-6 border-b border-border pb-6 md:flex-row md:items-end">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-              <Activity className="h-4 w-4" />
-              Mint Jobs
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Background Jobs</h1>
-            <p className="mt-2 text-muted-foreground">
-              Track your batch mint jobs. Pause, resume or inspect progress at any time.
+            <p className="label">§Jobs · {jobs.length} entries</p>
+            <h1 className="display mt-3 text-5xl md:text-6xl">Background jobs.</h1>
+            <p className="mt-3 max-w-xl text-muted-foreground">
+              Track your batch mint jobs in real time. Pause, resume, inspect.
             </p>
           </div>
           <Button asChild>
             <Link href="/collections/create">
-              New Job <ArrowRight className="ml-2 h-4 w-4" />
+              Queue a new job <ArrowUpRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-px bg-border">
           {jobs.map((job) => (
-            <Card key={job.id} className="transition-all hover:shadow-md">
-              <CardHeader>
+            <Card key={job.id} className="rounded-none bg-background">
+              <CardHeader className="border-b border-border">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-muted-foreground">{job.id}</span>
-                      <StatusBadge status={job.status} />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {job.id}
+                      </span>
+                      <StatusPill status={job.status} />
                     </div>
                     <CardTitle className="mt-1">{job.collection}</CardTitle>
-                    <CardDescription>
-                      Started <span className="font-mono">{job.startedAt}</span> · Rate{' '}
-                      <span className="font-mono">{job.rate}</span>
+                    <CardDescription className="mt-1">
+                      Started <span className="font-mono text-foreground">{job.startedAt}</span> ·
+                      rate <span className="font-mono text-foreground">{job.rate}</span>
                     </CardDescription>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-muted-foreground">Cost so far</div>
-                    <div className="font-mono text-lg">{job.cost}</div>
+                    <div className="label">Cost so far</div>
+                    <div className="mt-1 font-mono text-lg text-primary">{job.cost}</div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                  <div className="mb-1 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     <span>Progress</span>
                     <span>
                       {job.minted.toLocaleString()} / {job.total.toLocaleString()} (
@@ -96,23 +105,25 @@ export default function JobsPage() {
                   </div>
                   <Progress
                     value={(job.minted / job.total) * 100}
-                    className="h-2"
+                    className="h-1 [&>div]:bg-primary"
                   />
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-2">
                   {job.status === 'PROCESSING' && (
                     <Button size="sm" variant="outline">
-                      <Pause className="mr-2 h-4 w-4" /> Pause
+                      <Pause className="h-3.5 w-3.5" /> Pause
                     </Button>
                   )}
                   {job.status === 'PENDING' && (
                     <Button size="sm">
-                      <Play className="mr-2 h-4 w-4" /> Start
+                      <Play className="h-3.5 w-3.5" /> Start
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href="/collections/demo-collection-01">View collection</Link>
+                  <Button size="sm" variant="ghost" asChild>
+                    <Link href="/collections/demo-collection-01">
+                      View collection <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -124,18 +135,15 @@ export default function JobsPage() {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { cls: string; icon: React.ComponentType<{ className?: string }> }> = {
-    PROCESSING: { cls: 'bg-blue-500/10 text-blue-500 border-blue-500/20', icon: Activity },
-    COMPLETED: { cls: 'bg-green-500/10 text-green-500 border-green-500/20', icon: CheckCircle2 },
-    PENDING: { cls: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20', icon: Clock },
-    FAILED: { cls: 'bg-red-500/10 text-red-500 border-red-500/20', icon: AlertCircle },
-  };
-  const { cls, icon: Icon } = map[status] ?? { cls: '', icon: Clock as React.ComponentType<{ className?: string }> };
+function StatusPill({ status }: { status: string }) {
+  const cfg = STATUS_VARIANT[status] ?? STATUS_VARIANT.PENDING;
+  const Icon = cfg.icon;
   return (
-    <Badge variant="outline" className={cls}>
-      <Icon className="mr-1 h-3 w-3" />
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-[2px] border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] ${cfg.cls}`}
+    >
+      <Icon className="h-3 w-3" />
       {status}
-    </Badge>
+    </span>
   );
 }

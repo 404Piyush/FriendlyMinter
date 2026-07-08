@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Clock,
   Zap,
+  ArrowUpRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,7 +49,7 @@ const COLLECTIONS: Record<string, Collection> = {
     merkleTree: '8xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
     creator: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
     description: '1,000 generative pixel-art characters minted via Bubblegum.',
-    image: '🎨',
+    image: 'GPX',
     depth: 14,
     buffer: 64,
     createdAt: '2025-08-15',
@@ -62,7 +63,7 @@ const COLLECTIONS: Record<string, Collection> = {
     merkleTree: '6rY9Tg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
     creator: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
     description: 'Hand-illustrated profile-pic collection with royalty splits.',
-    image: '👑',
+    image: 'DGL',
     depth: 17,
     buffer: 64,
     createdAt: '2025-08-22',
@@ -76,7 +77,7 @@ const COLLECTIONS: Record<string, Collection> = {
     merkleTree: '3aP7Tg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
     creator: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
     description: 'POAP-style attendance tokens, batch-minted after each event.',
-    image: '🧾',
+    image: 'RCPT',
     depth: 14,
     buffer: 64,
     createdAt: '2025-09-01',
@@ -84,13 +85,21 @@ const COLLECTIONS: Record<string, Collection> = {
 };
 
 const recentMints = [
-  { id: 642, owner: 'Gx9K…mP2', time: '2s ago', img: '🎨' },
-  { id: 641, owner: 'B3xF…yR8', time: '4s ago', img: '🎨' },
-  { id: 640, owner: 'Ht7W…qN5', time: '6s ago', img: '🎨' },
-  { id: 639, owner: '4aB8…kT1', time: '8s ago', img: '🎨' },
-  { id: 638, owner: 'Yk2P…vM3', time: '10s ago', img: '🎨' },
-  { id: 637, owner: 'Fn6L…xD9', time: '12s ago', img: '🎨' },
+  { id: 642, owner: 'Gx9K…mP2', time: '2s ago' },
+  { id: 641, owner: 'B3xF…yR8', time: '4s ago' },
+  { id: 640, owner: 'Ht7W…qN5', time: '6s ago' },
+  { id: 639, owner: '4aB8…kT1', time: '8s ago' },
+  { id: 638, owner: 'Yk2P…vM3', time: '10s ago' },
+  { id: 637, owner: 'Fn6L…xD9', time: '12s ago' },
 ];
+
+const STATUS_VARIANT: Record<string, 'success' | 'default' | 'secondary' | 'muted' | 'destructive'> = {
+  COMPLETED: 'success',
+  MINTING: 'default',
+  INITIALIZED: 'secondary',
+  DRAFT: 'muted',
+  FAILED: 'destructive',
+};
 
 export default function CollectionDetailPage({
   params,
@@ -103,11 +112,12 @@ export default function CollectionDetailPage({
 
   if (!c) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="relative z-10">
         <Header />
         <main className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold">Collection not found</h1>
-          <Button asChild className="mt-4" variant="outline">
+          <p className="label">404 · Not found</p>
+          <h1 className="display mt-3 text-5xl">No such collection.</h1>
+          <Button asChild className="mt-6" variant="outline">
             <Link href="/collections">Back to collections</Link>
           </Button>
         </main>
@@ -116,131 +126,153 @@ export default function CollectionDetailPage({
   }
 
   const pct = (c.minted / c.max) * 100;
-
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard');
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative z-10">
       <Header />
 
-      <main className="container mx-auto px-4 py-12">
-        <Button variant="ghost" asChild className="mb-6">
-          <Link href="/collections">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Collections
-          </Link>
-        </Button>
+      <main className="container mx-auto px-4 pt-12 pb-24">
+        <Link
+          href="/collections"
+          className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          Back to collections
+        </Link>
 
         {/* Header */}
-        <div className="grid gap-8 md:grid-cols-[300px_1fr]">
-          <Card className="overflow-hidden">
-            <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-primary/20 to-blue-500/20 text-9xl">
-              {c.image}
-            </div>
-          </Card>
+        <div className="grid gap-10 border-b border-border pb-10 md:grid-cols-[260px_1fr]">
+          <div className="flex aspect-square items-center justify-center bg-primary font-mono text-7xl font-semibold text-primary-foreground">
+            {c.image}
+          </div>
 
           <div className="space-y-6">
             <div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Coins className="h-4 w-4" />
-                Collection · {c.symbol}
-              </div>
-              <h1 className="mt-1 text-4xl font-bold tracking-tight">{c.name}</h1>
-              <p className="mt-2 text-lg text-muted-foreground">{c.description}</p>
-              <div className="mt-4 flex items-center gap-2">
-                <Badge>
-                  <Activity className="mr-1 h-3 w-3" />
-                  {c.status}
-                </Badge>
-                <Badge variant="outline">Created {c.createdAt}</Badge>
+              <p className="label">§{c.symbol} · created {c.createdAt}</p>
+              <h1 className="display mt-3 text-5xl md:text-6xl">{c.name}</h1>
+              <p className="mt-3 max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground">
+                {c.description}
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Badge variant={STATUS_VARIANT[c.status] ?? 'muted'}>{c.status}</Badge>
+                <Badge variant="outline">depth {c.depth} / buffer {c.buffer}</Badge>
+                <Badge variant="outline">Bubblegum v2</Badge>
               </div>
             </div>
 
-            <Card>
-              <CardContent className="space-y-3 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-muted-foreground">Mint progress</div>
-                    <div className="mt-1 text-3xl font-bold">
-                      {c.minted.toLocaleString()} <span className="text-muted-foreground">/ {c.max.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  <div className="text-right text-3xl font-bold text-primary">{pct.toFixed(1)}%</div>
-                </div>
-                <Progress value={pct} className="h-2" />
-              </CardContent>
-            </Card>
+            <div className="border border-border bg-card p-6">
+              <div className="flex items-baseline justify-between">
+                <span className="label">Mint progress</span>
+                <span className="font-mono text-xs text-primary">{pct.toFixed(1)}%</span>
+              </div>
+              <div className="mt-3 flex items-baseline gap-3">
+                <span className="display text-4xl">{c.minted.toLocaleString()}</span>
+                <span className="text-muted-foreground">/ {c.max.toLocaleString()}</span>
+              </div>
+              <Progress value={pct} className="mt-4 h-1 [&>div]:bg-primary" />
+            </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Button>{c.status === 'INITIALIZED' ? 'Start Mint' : 'Resume Mint'}</Button>
-              <Button variant="outline" asChild>
+            <div className="flex flex-wrap gap-2">
+              <Button size="lg">
+                {c.status === 'INITIALIZED' ? 'Start minting' : c.status === 'COMPLETED' ? 'Re-mint' : 'Resume mint'}
+              </Button>
+              <Button size="lg" variant="outline" asChild>
                 <a href={explorerUrl} target="_blank" rel="noopener noreferrer">
-                  View on Explorer <ExternalLink className="ml-2 h-4 w-4" />
+                  Explorer <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
-              <Button variant="outline">Pause</Button>
+              <Button size="lg" variant="ghost">
+                Pause
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-4">
+        {/* Stats grid */}
+        <div className="my-10 grid grid-cols-2 gap-px bg-border md:grid-cols-4">
           <Stat icon={Users} label="Holders" value="412" />
           <Stat icon={Coins} label="Volume" value="84.3 SOL" />
-          <Stat icon={Zap} label="Mint fee" value="~0.00001 SOL" />
-          <Stat icon={Hash} label="Tree address" value={`${c.merkleTree.slice(0, 4)}…${c.merkleTree.slice(-4)}`} mono />
+          <Stat icon={Zap} label="Mint fee" value="~0.00001 SOL" mono />
+          <Stat icon={Hash} label="Tree" value={`${c.merkleTree.slice(0, 4)}…${c.merkleTree.slice(-4)}`} mono />
         </div>
 
-        <Tabs defaultValue="items" className="mt-10">
-          <TabsList>
-            <TabsTrigger value="items">
-              <ImageIcon className="mr-2 h-4 w-4" /> Recent Mints
+        {/* Tabs */}
+        <Tabs defaultValue="items">
+          <TabsList className="border-b border-border bg-transparent p-0">
+            <TabsTrigger
+              value="items"
+              className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              <ImageIcon className="mr-2 h-4 w-4" /> Recent mints
             </TabsTrigger>
-            <TabsTrigger value="config">
-              <Hash className="mr-2 h-4 w-4" /> Configuration
+            <TabsTrigger
+              value="config"
+              className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              <Hash className="mr-2 h-4 w-4" /> On-chain config
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="items" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent mints</CardTitle>
-                <CardDescription>Latest on-chain mint events for this collection.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
-                  {recentMints.map((m) => (
-                    <div key={m.id} className="rounded-lg border p-3 text-center">
-                      <div className="mb-2 text-4xl">{m.img}</div>
-                      <div className="font-mono text-xs">#{m.id}</div>
-                      <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">{m.owner}</div>
-                      <div className="mt-1 flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
-                        <Clock className="h-3 w-3" /> {m.time}
-                      </div>
+            <div className="border border-border">
+              <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-3 md:grid-cols-6">
+                {recentMints.map((m) => (
+                  <div key={m.id} className="bg-card p-4">
+                    <div className="mb-3 flex h-16 items-center justify-center bg-secondary font-mono text-2xl font-semibold">
+                      {c.image}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="font-mono text-xs">#{m.id}</div>
+                    <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
+                      {m.owner}
+                    </div>
+                    <div className="mt-1 flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+                      <Clock className="h-3 w-3" /> {m.time}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="config" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>On-chain configuration</CardTitle>
-                <CardDescription>Parameters baked into the Merkle tree.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <ConfigRow label="Merkle Tree Address" value={c.merkleTree} mono copy={copy} />
-                <ConfigRow label="Creator" value={c.creator} mono copy={copy} />
-                <ConfigRow label="Max Depth" value={String(c.depth)} />
-                <ConfigRow label="Max Buffer Size" value={String(c.buffer)} />
-                <ConfigRow label="Network" value="Solana Devnet" />
-                <ConfigRow label="Standard" value="Metaplex Bubblegum (cNFT v2)" />
-              </CardContent>
-            </Card>
+            <div className="border border-border bg-card">
+              {[
+                { k: 'Merkle tree address', v: c.merkleTree, mono: true },
+                { k: 'Creator', v: c.creator, mono: true },
+                { k: 'Max depth', v: String(c.depth), mono: true },
+                { k: 'Max buffer size', v: String(c.buffer), mono: true },
+                { k: 'Network', v: 'Solana Devnet', mono: false },
+                { k: 'Standard', v: 'Metaplex Bubblegum v2', mono: false },
+              ].map((row, i, arr) => (
+                <div
+                  key={row.k}
+                  className={`flex items-center justify-between gap-3 px-5 py-4 ${
+                    i < arr.length - 1 ? 'border-b border-border' : ''
+                  }`}
+                >
+                  <span className="label">{row.k}</span>
+                  <div className="flex max-w-[60%] items-center gap-2">
+                    <span className={`truncate font-mono text-xs ${row.mono ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {row.v}
+                    </span>
+                    {row.mono && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-primary"
+                        onClick={() => copy(row.v)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </main>
@@ -260,41 +292,13 @@ function Stat({
   mono?: boolean;
 }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-3 p-4">
-        <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <div className="text-xs text-muted-foreground">{label}</div>
-          <div className={`truncate text-sm font-semibold ${mono ? 'font-mono' : ''}`}>{value}</div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ConfigRow({
-  label,
-  value,
-  mono,
-  copy,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  copy?: (v: string) => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 border-b pb-3 last:border-0">
-      <span className="text-muted-foreground">{label}</span>
-      <div className="flex max-w-[60%] items-center gap-2">
-        <span className={`truncate font-mono text-xs ${mono ? 'text-foreground' : ''}`}>{value}</span>
-        {copy && (
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copy(value)}>
-            <Copy className="h-3 w-3" />
-          </Button>
-        )}
+    <div className="bg-background p-5">
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-primary" />
+        <span className="label">{label}</span>
+      </div>
+      <div className={`mt-2 truncate font-serif text-2xl tracking-tight ${mono ? 'font-mono text-base' : ''}`}>
+        {value}
       </div>
     </div>
   );
