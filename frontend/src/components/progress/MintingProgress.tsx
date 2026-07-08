@@ -292,7 +292,7 @@ export const MintingProgress: React.FC<MintingProgressProps> = ({
           
           {canCancel && (
             <Button
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={() => onCancel(job.id)}
             >

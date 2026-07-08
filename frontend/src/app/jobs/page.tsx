@@ -1,103 +1,98 @@
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Activity, ArrowUpRight, Clock, CheckCircle2, AlertCircle, Play, Pause } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Play, Pause } from 'lucide-react';
 
 const jobs = [
   {
-    id: 'JOB-0001',
+    id: 'job-1',
     collection: 'Solana Genesis Pixels',
-    status: 'PROCESSING',
+    status: 'Processing',
+    variant: 'default' as const,
     minted: 642,
     total: 1000,
-    startedAt: '12 min ago',
     rate: '53 / sec',
     cost: '0.0063 SOL',
   },
   {
-    id: 'JOB-0002',
+    id: 'job-2',
     collection: 'On-chain Receipts',
-    status: 'COMPLETED',
+    status: 'Completed',
+    variant: 'success' as const,
     minted: 2500,
     total: 2500,
-    startedAt: '2 days ago',
     rate: '—',
     cost: '0.0187 SOL',
   },
   {
-    id: 'JOB-0003',
+    id: 'job-3',
     collection: 'DeGods Lite',
-    status: 'PENDING',
+    status: 'Pending',
+    variant: 'muted' as const,
     minted: 0,
     total: 5000,
-    startedAt: 'queued',
     rate: '—',
     cost: '~0.0250 SOL',
   },
 ];
 
-const STATUS_VARIANT: Record<
-  string,
-  { cls: string; icon: React.ComponentType<{ className?: string }> }
-> = {
-  PROCESSING: { cls: 'border-primary/40 bg-primary/15 text-primary', icon: Activity },
-  COMPLETED: { cls: 'border-success/40 bg-success/15 text-success', icon: CheckCircle2 },
-  PENDING: { cls: 'border-muted-foreground/40 bg-secondary text-muted-foreground', icon: Clock },
-  FAILED: { cls: 'border-destructive/40 bg-destructive/15 text-destructive', icon: AlertCircle },
-};
-
 export default function JobsPage() {
   return (
-    <div className="relative z-10">
+    <div>
       <Header />
-
-      <main className="container mx-auto px-4 pt-12 pb-24">
-        <div className="mb-10 flex flex-col items-start justify-between gap-6 border-b border-border pb-6 md:flex-row md:items-end">
+      <main className="container mx-auto px-6 py-16">
+        <div className="mb-12 flex items-end justify-between gap-6">
           <div>
-            <p className="label">§Jobs · {jobs.length} entries</p>
-            <h1 className="display mt-3 text-5xl md:text-6xl">Background jobs.</h1>
-            <p className="mt-3 max-w-xl text-muted-foreground">
-              Track your batch mint jobs in real time. Pause, resume, inspect.
+            <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">Jobs</h1>
+            <p className="mt-3 max-w-md text-muted-foreground">
+              Background batch mint jobs. Pause, resume, inspect.
             </p>
           </div>
           <Button asChild>
-            <Link href="/collections/create">
-              Queue a new job <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <Link href="/collections/create">Queue new job</Link>
           </Button>
         </div>
 
         <div className="space-y-px bg-border">
           {jobs.map((job) => (
             <Card key={job.id} className="rounded-none bg-background">
-              <CardHeader className="border-b border-border">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+              <CardContent className="py-6">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                        {job.id}
-                      </span>
-                      <StatusPill status={job.status} />
+                    <div className="flex items-center gap-2">
+                      <Badge variant={job.variant}>{job.status}</Badge>
+                      <span className="font-mono text-xs text-muted-foreground">{job.id}</span>
                     </div>
-                    <CardTitle className="mt-1">{job.collection}</CardTitle>
-                    <CardDescription className="mt-1">
-                      Started <span className="font-mono text-foreground">{job.startedAt}</span> ·
-                      rate <span className="font-mono text-foreground">{job.rate}</span>
-                    </CardDescription>
+                    <h2 className="mt-2 text-xl font-semibold tracking-tight">
+                      {job.collection}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Rate <span className="font-mono text-foreground">{job.rate}</span> · Cost{' '}
+                      <span className="font-mono text-foreground">{job.cost}</span>
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <div className="label">Cost so far</div>
-                    <div className="mt-1 font-mono text-lg text-primary">{job.cost}</div>
+
+                  <div className="flex gap-2">
+                    {job.status === 'Processing' && (
+                      <Button variant="outline" size="sm">
+                        <Pause className="size-4" />
+                        Pause
+                      </Button>
+                    )}
+                    {job.status === 'Pending' && (
+                      <Button size="sm">
+                        <Play className="size-4" />
+                        Start
+                      </Button>
+                    )}
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <div className="mb-1 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                    <span>Progress</span>
+
+                <div className="mt-6">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>
                       {job.minted.toLocaleString()} / {job.total.toLocaleString()} (
                       {((job.minted / job.total) * 100).toFixed(1)}%)
@@ -105,26 +100,8 @@ export default function JobsPage() {
                   </div>
                   <Progress
                     value={(job.minted / job.total) * 100}
-                    className="h-1 [&>div]:bg-primary"
+                    className="mt-2 h-px [&>div]:bg-primary"
                   />
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {job.status === 'PROCESSING' && (
-                    <Button size="sm" variant="outline">
-                      <Pause className="h-3.5 w-3.5" /> Pause
-                    </Button>
-                  )}
-                  {job.status === 'PENDING' && (
-                    <Button size="sm">
-                      <Play className="h-3.5 w-3.5" /> Start
-                    </Button>
-                  )}
-                  <Button size="sm" variant="ghost" asChild>
-                    <Link href="/collections/demo-collection-01">
-                      View collection <ArrowUpRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -132,18 +109,5 @@ export default function JobsPage() {
         </div>
       </main>
     </div>
-  );
-}
-
-function StatusPill({ status }: { status: string }) {
-  const cfg = STATUS_VARIANT[status] ?? STATUS_VARIANT.PENDING;
-  const Icon = cfg.icon;
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-[2px] border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] ${cfg.cls}`}
-    >
-      <Icon className="h-3 w-3" />
-      {status}
-    </span>
   );
 }

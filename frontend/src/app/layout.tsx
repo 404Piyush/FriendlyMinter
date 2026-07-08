@@ -1,15 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  display: "swap",
-  axes: ["SOFT", "WONK", "opsz"],
-});
 
 const inter = Inter_Tight({
   variable: "--font-inter",
@@ -26,7 +19,7 @@ const jbMono = JetBrains_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b0a07",
+  themeColor: "#0a0a09",
 };
 
 export const metadata: Metadata = {
@@ -35,14 +28,12 @@ export const metadata: Metadata = {
     template: "%s — FriendlyMinter",
   },
   description:
-    "Mint thousands of compressed NFTs on Solana at ~99% lower cost. Bulk upload, live cost estimation, and job-queue minting — wrapped in a wallet-first dark UI.",
+    "Mint thousands of compressed NFTs on Solana at ~99% lower cost. Bulk upload, live cost estimation, and job-queue minting.",
   keywords: [
     "Solana",
     "cNFT",
     "compressed NFT",
     "minting",
-    "blockchain",
-    "NFT collection",
     "Metaplex",
     "Bubblegum",
     "Merkle tree",
@@ -54,8 +45,7 @@ export const metadata: Metadata = {
   applicationName: "FriendlyMinter",
   openGraph: {
     title: "FriendlyMinter — Compressed NFT Minting on Solana",
-    description:
-      "Batch mint compressed NFTs on Solana. ~99% cheaper than traditional mints.",
+    description: "Batch mint compressed NFTs on Solana.",
     type: "website",
     siteName: "FriendlyMinter",
   },
@@ -78,7 +68,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${inter.variable} ${jbMono.variable}`}
+      className={`${inter.variable} ${jbMono.variable}`}
     >
       <body>
         <WalletProvider>
