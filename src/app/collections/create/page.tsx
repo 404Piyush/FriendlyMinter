@@ -359,21 +359,47 @@ export default function CreateCollectionPage() {
           )}
 
           {step === 3 && (
-            <div className="rounded-2xl bg-background p-6 shadow-[-6px_-6px_14px_rgba(255,255,255,0.9),6px_6px_14px_rgba(150,130,100,0.28)]">
-              <dl className="space-y-3 font-mono text-sm">
-                <ReviewRow label="Name" value={name || '—'} />
-                <ReviewRow label="Symbol" value={symbol ? symbol.toUpperCase() : '—'} />
-                {description && <ReviewRow label="Description" value={description} />}
-                <ReviewRow
-                  label="Tree"
-                  value={`depth ${maxDepth} · ${treeCapacity(maxDepth)} leaves · buffer ${FIXED_BUFFER_SIZE}`}
-                />
-                <ReviewRow label="Items" value={numNfts.toLocaleString()} />
-                <ReviewRow label="Total" value={`${fmt(aTotal)} SOL`} highlight />
-              </dl>
-              <p className="mt-4 font-mono text-[10px] text-muted-foreground">
-                9Toww…3A7e · devnet
-              </p>
+            <div className="grid gap-6 md:grid-cols-[1fr_280px]">
+              <div className="rounded-2xl bg-background p-6 shadow-[-6px_-6px_14px_rgba(255,255,255,0.9),6px_6px_14px_rgba(150,130,100,0.28)]">
+                <dl className="space-y-3 font-mono text-sm">
+                  <ReviewRow label="Name" value={name || '—'} />
+                  <ReviewRow label="Symbol" value={symbol ? symbol.toUpperCase() : '—'} />
+                  {description && <ReviewRow label="Description" value={description} />}
+                  <ReviewRow
+                    label="Tree"
+                    value={`depth ${maxDepth} · ${treeCapacity(maxDepth)} leaves · buffer ${FIXED_BUFFER_SIZE}`}
+                  />
+                  <ReviewRow label="Items" value={numNfts.toLocaleString()} />
+                </dl>
+                <p className="mt-4 font-mono text-[10px] text-muted-foreground">
+                  9Toww…3A7e · devnet
+                </p>
+              </div>
+
+              <aside className="self-start rounded-2xl bg-background p-6 shadow-[inset_4px_4px_8px_rgba(150,130,100,0.28),inset_-4px_-4px_8px_rgba(255,255,255,0.9)]">
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Total cost
+                </div>
+                <div className="mt-2 font-mono text-5xl font-medium tabular-nums tracking-tight">
+                  {fmt(aTotal)}
+                  <span className="ml-2 text-base font-normal text-muted-foreground">SOL</span>
+                </div>
+                <div className="mt-4 space-y-1.5 font-mono text-xs">
+                  <ReviewCostLine label="tree rent" value={fmt(aRent)} />
+                  <ReviewCostLine
+                    label={`${numNfts.toLocaleString()} mints`}
+                    value={fmt(aMint)}
+                  />
+                  <ReviewCostLine label="compression" value={fmt(aComp)} />
+                </div>
+                <div className="mt-4 border-t border-border pt-3 font-mono text-xs text-muted-foreground">
+                  saves{' '}
+                  <span className="text-sol-green">
+                    {Math.max(0, savingsPct).toFixed(1)}%
+                  </span>{' '}
+                  vs legacy mint
+                </div>
+              </aside>
             </div>
           )}
         </div>
@@ -442,18 +468,23 @@ function QuickAmount({
 function ReviewRow({
   label,
   value,
-  highlight,
 }: {
   label: string;
   value: string;
-  highlight?: boolean;
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">{label}</dt>
-      <dd className={`text-right ${highlight ? 'text-xl font-medium tabular-nums text-foreground' : 'tabular-nums text-foreground'}`}>
-        {value}
-      </dd>
+      <dd className="text-right tabular-nums text-foreground">{value}</dd>
+    </div>
+  );
+}
+
+function ReviewCostLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between text-muted-foreground">
+      <span>{label}</span>
+      <span className="text-foreground tabular-nums">{value}</span>
     </div>
   );
 }
