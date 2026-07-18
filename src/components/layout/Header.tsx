@@ -52,7 +52,6 @@ function NavLink({ href, name, isActive }: { href: string; name: string; isActiv
 const navItems = [
   { name: "Dashboard", href: "/" },
   { name: "Collections", href: "/collections" },
-  { name: "Demo", href: "/demo" },
   { name: "Docs", href: "/docs" },
 ];
 

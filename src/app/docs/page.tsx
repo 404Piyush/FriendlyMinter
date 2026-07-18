@@ -29,14 +29,10 @@ export default function DocsPage() {
                 FriendlyMinter docs
               </h1>
               <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Build with the same APIs the demo uses. Everything runs against mock data until you
-                set <code className="font-mono text-foreground">NEXT_PUBLIC_USE_MOCK_API=false</code>{' '}
-                and wire a backend.
+                Build against the live Solana devnet. Connect a wallet, sign a request, and the
+                deployer creates the on-chain Merkle tree for you.
               </p>
               <div className="mt-8 flex flex-wrap gap-2">
-                <Button asChild>
-                  <Link href="/demo">Open the demo</Link>
-                </Button>
                 <Button asChild variant="outline">
                   <a
                     href="https://github.com/404Piyush/FriendlyMinter"
@@ -74,11 +70,11 @@ export default function DocsPage() {
 
             {/* Quickstart */}
             <Section id="quickstart" title="Quick start">
-              <p>Run the demo locally in three commands:</p>
+              <p>Run it locally in three commands:</p>
               <CodeBlock
                 language="bash"
                 code={`git clone https://github.com/404Piyush/FriendlyMinter.git
-cd FriendlyMinter/frontend
+cd FriendlyMinter
 npm install && npm run dev`}
               />
               <p>
@@ -281,12 +277,12 @@ export function MyComponent() {
             </Section>
 
             <div className="mt-16 border border-border p-8">
-              <h3 className="text-xl font-semibold tracking-tight">Prefer to click than read?</h3>
+              <h3 className="text-xl font-semibold tracking-tight">Ready to mint?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                The demo runs the full flow against mock data. No wallet required.
+                Connect a wallet and create your first collection. Test SOL on devnet.
               </p>
               <Button asChild className="mt-5">
-                <Link href="/demo">Open demo →</Link>
+                <Link href="/collections/create">Start a collection →</Link>
               </Button>
             </div>
           </main>

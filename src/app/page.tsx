@@ -26,8 +26,8 @@ export default function Home() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/demo">
-                Try the demo
+              <Link href="/docs">
+                Read the docs
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -83,13 +83,13 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button size="lg" asChild>
-                <Link href="/demo">
-                  Open demo
+                <Link href="/collections/create">
+                  Start a collection
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/collections/create">Start a collection</Link>
+                <Link href="/docs">Read the docs</Link>
               </Button>
             </div>
           </div>
