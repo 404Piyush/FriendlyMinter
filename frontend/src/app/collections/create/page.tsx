@@ -1,67 +1,171 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { toast } from 'sonner';
+import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
 
-interface TreeParams {
-  maxDepth: number;
-  maxBufferSize: number;
-  canopyDepth: number;
+import { useUmi, getSiteUrl } from '@/lib/bubblegum/umi';
+import {
+  TREE_PRESETS,
+  capacityOf,
+  createBubblegumCollection,
+  createBubblegumTree,
+  estimatePerMintSol,
+  estimateTreeRentSol,
+  type TreeParams,
+} from '@/lib/bubblegum/tree';
+import { useStore, newId } from '@/lib/store';
+import bs58Pkg from 'bs58';
+
+const NETWORK_LABEL: Record<string, string> = {
+  devnet: 'Solana Devnet',
+  testnet: 'Solana Testnet',
+  'mainnet-beta': 'Solana Mainnet',
+};
+
+function networkLabelFromEnv(): string {
+  const n = (process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'devnet') as string;
+  return NETWORK_LABEL[n] ?? 'Solana Devnet';
 }
 
-const presets: Array<{ label: string; params: TreeParams; capacity: string }> = [
-  { label: 'Tiny', params: { maxDepth: 3, maxBufferSize: 8, canopyDepth: 0 }, capacity: '~8 NFTs' },
-  { label: 'Small', params: { maxDepth: 10, maxBufferSize: 16, canopyDepth: 3 }, capacity: '~1K' },
-  { label: 'Medium', params: { maxDepth: 14, maxBufferSize: 64, canopyDepth: 0 }, capacity: '~16K' },
-  { label: 'Large', params: { maxDepth: 17, maxBufferSize: 64, canopyDepth: 0 }, capacity: '~131K' },
-  { label: 'XL', params: { maxDepth: 20, maxBufferSize: 64, canopyDepth: 0 }, capacity: '~1M' },
-];
-
-function estimateCost(maxDepth: number, maxBufferSize: number, numNfts: number) {
-  const accountsRent = maxBufferSize * 0.000005 + 0.00089;
-  const treeRent = (2 ** maxDepth) * 0.000005;
-  const mintFee = numNfts * 0.000005;
-  const compression = numNfts * 0.0000035;
-  return {
-    rent: accountsRent + treeRent,
-    mint: mintFee,
-    compression,
-    total: accountsRent + treeRent + mintFee + compression,
-  };
+interface PresetRow {
+  label: string;
+  params: TreeParams;
+  capacity: string;
+  rentSol: number;
 }
 
 export default function CreateCollectionPage() {
+  const router = useRouter();
+  const wallet = useWallet();
+  const { connection } = useConnection();
+  const umi = useUmi();
+  const addCollection = useStore((s) => s.addCollection);
+
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [description, setDescription] = useState('');
-  const [numNfts, setNumNfts] = useState(1000);
-  const [params, setParams] = useState<TreeParams>({ maxDepth: 14, maxBufferSize: 64, canopyDepth: 0 });
+  const [numNfts, setNumNfts] = useState(100);
+  const [params, setParams] = useState<TreeParams>({ ...TREE_PRESETS.medium });
   const [submitting, setSubmitting] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
-  const cost = estimateCost(params.maxDepth, params.maxBufferSize, numNfts);
+  useEffect(() => {
+    let cancelled = false;
+    if (!wallet.connected || !wallet.publicKey) {
+      setBalance(null);
+      return;
+    }
+    (async () => {
+      try {
+        const lamports = await connection.getBalance(wallet.publicKey!);
+        if (!cancelled) setBalance(lamports / LAMPORTS_PER_SOL);
+      } catch {
+        if (!cancelled) setBalance(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [wallet.connected, wallet.publicKey?.toBase58(), connection]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const presets: PresetRow[] = useMemo(
+    () =>
+      (Object.entries(TREE_PRESETS) as [keyof typeof TREE_PRESETS, TreeParams][]).map(
+        ([label, p]) => ({
+          label,
+          params: p,
+          capacity: `~${capacityOf(p).toLocaleString()}`,
+          rentSol: estimateTreeRentSol(p),
+        }),
+      ),
+    [],
+  );
+
+  const treeRent = estimateTreeRentSol(params);
+  const mintCost = estimatePerMintSol() * numNfts;
+  const total = treeRent + mintCost;
+  const funded = balance !== null && balance >= total + 0.005;
+
+  const networkLabel = networkLabelFromEnv();
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!wallet.connected || !wallet.publicKey) {
+      toast.error('Connect a wallet first');
+      return;
+    }
     if (!name.trim() || !symbol.trim()) {
       toast.error('Name and symbol are required');
       return;
     }
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success(`${name} (${symbol}) created`, {
-        description: `${numNfts.toLocaleString()} items queued (demo)`,
+    if (balance !== null && balance < total + 0.01) {
+      toast.error('Wallet balance too low for tree rent + mints', {
+        description: `Need ~${total.toFixed(3)} SOL, have ${balance.toFixed(4)} SOL`,
       });
-    }, 1000);
-  };
+      return;
+    }
+
+    setSubmitting(true);
+    const collectionId = newId('col');
+
+    try {
+      toast.loading('Creating Merkle tree on testnet…', { id: 'create-tree' });
+
+      const tree = await createBubblegumTree(umi, params);
+      toast.loading('Creating collection NFT…', { id: 'create-tree' });
+
+      const collection = await createBubblegumCollection(umi, {
+        name: name.trim(),
+        symbol: symbol.trim().toUpperCase(),
+        uri: `${getSiteUrl()}/api/metadata/${encodeURIComponent(collectionId)}/0.json`,
+      });
+
+      addCollection({
+        id: collectionId,
+        name: name.trim(),
+        symbol: symbol.trim().toUpperCase(),
+        description: description.trim() || undefined,
+        merkleTree: tree.merkleTree.toString(),
+        collectionMint: collection.collection.toString(),
+        owner: wallet.publicKey.toBase58(),
+        maxDepth: params.maxDepth,
+        maxBufferSize: params.maxBufferSize,
+        canopyDepth: params.canopyDepth,
+        capacity: capacityOf(params),
+        status: 'INITIALIZED',
+        createdAt: Date.now(),
+        treeSignature: bs58(tree.signature),
+        collectionSignature: bs58(collection.signature),
+      });
+
+      toast.success(`Collection "${name.trim()}" created on-chain`, {
+        id: 'create-tree',
+        description: `Tree: ${tree.merkleTree.toString().slice(0, 8)}…`,
+      });
+      router.push(`/collections/${collectionId}`);
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error('Create failed', {
+        id: 'create-tree',
+        description: message,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div>
@@ -75,13 +179,10 @@ export default function CreateCollectionPage() {
           Collections
         </Link>
 
-        <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-          New collection
-        </h1>
+        <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">New collection</h1>
 
         <form onSubmit={handleSubmit} className="mt-12 grid gap-16 lg:grid-cols-[1fr_280px]">
           <div className="space-y-12">
-            {/* Metadata */}
             <div>
               <h2 className="text-xl font-semibold tracking-tight">Metadata</h2>
               <div className="mt-6 space-y-5">
@@ -122,16 +223,11 @@ export default function CreateCollectionPage() {
 
                 <div>
                   <Label htmlFor="image">Cover image URL</Label>
-                  <Input
-                    id="image"
-                    placeholder="https://…/cover.png"
-                    className="mt-2"
-                  />
+                  <Input id="image" placeholder="https://…/cover.png" className="mt-2" />
                 </div>
               </div>
             </div>
 
-            {/* Tree parameters */}
             <div>
               <h2 className="text-xl font-semibold tracking-tight">Merkle tree</h2>
               <div className="mt-6 grid gap-5 md:grid-cols-3">
@@ -142,7 +238,9 @@ export default function CreateCollectionPage() {
                     min={3}
                     max={30}
                     value={params.maxDepth}
-                    onChange={(e) => setParams((p) => ({ ...p, maxDepth: Number(e.target.value) }))}
+                    onChange={(e) =>
+                      setParams((p) => ({ ...p, maxDepth: Number(e.target.value) }))
+                    }
                     className="mt-2 font-mono"
                   />
                 </div>
@@ -153,7 +251,9 @@ export default function CreateCollectionPage() {
                     min={1}
                     max={2048}
                     value={params.maxBufferSize}
-                    onChange={(e) => setParams((p) => ({ ...p, maxBufferSize: Number(e.target.value) }))}
+                      onChange={(e) =>
+                      setParams((p) => ({ ...p, maxBufferSize: Number(e.target.value) }))
+                    }
                     className="mt-2 font-mono"
                   />
                 </div>
@@ -164,7 +264,9 @@ export default function CreateCollectionPage() {
                     min={0}
                     max={20}
                     value={params.canopyDepth}
-                    onChange={(e) => setParams((p) => ({ ...p, canopyDepth: Number(e.target.value) }))}
+                      onChange={(e) =>
+                      setParams((p) => ({ ...p, canopyDepth: Number(e.target.value) }))
+                    }
                     className="mt-2 font-mono"
                   />
                 </div>
@@ -177,23 +279,25 @@ export default function CreateCollectionPage() {
                     type="button"
                     onClick={() => setParams(p.params)}
                     className={`border px-3 py-1.5 text-sm transition-colors ${
-                      params.maxDepth === p.params.maxDepth
+                      params.maxDepth === p.params.maxDepth &&
+                      params.maxBufferSize === p.params.maxBufferSize &&
+                      params.canopyDepth === p.params.canopyDepth
                         ? 'border-primary bg-primary/10 text-foreground'
                         : 'border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground'
                     }`}
                   >
-                    <span className="font-medium">{p.label}</span>
+                    <span className="font-medium capitalize">{p.label}</span>
                     <span className="ml-2 text-xs">{p.capacity}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">~{p.rentSol.toFixed(2)} SOL</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Volume */}
             <div>
               <h2 className="text-xl font-semibold tracking-tight">Mint volume</h2>
               <div className="mt-6 max-w-xs">
-                <Label htmlFor="num">Items in this collection</Label>
+                <Label htmlFor="num">Items queued for mint</Label>
                 <Input
                   id="num"
                   type="number"
@@ -202,40 +306,64 @@ export default function CreateCollectionPage() {
                   onChange={(e) => setNumNfts(Number(e.target.value))}
                   className="mt-2 font-mono"
                 />
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Each subsequent mint signs only the per-leaf Bubblegum tx (~{estimatePerMintSol().toExponential(2)} SOL).
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Cost summary */}
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             <div>
               <p className="text-sm text-muted-foreground">Estimated cost</p>
               <p className="mt-3 text-5xl font-semibold tracking-tight text-primary">
-                {cost.total.toFixed(4)}
+                {total.toFixed(4)}
                 <span className="ml-2 text-base font-normal text-muted-foreground">SOL</span>
               </p>
-              <p className="mt-2 text-xs text-muted-foreground">on Solana devnet</p>
+              <p className="mt-2 text-xs text-muted-foreground">on {networkLabel}</p>
+              {balance !== null && (
+                <p className={`mt-1 text-xs ${funded ? 'text-success' : 'text-destructive'}`}>
+                  Wallet balance: {balance.toFixed(4)} SOL
+                </p>
+              )}
             </div>
 
             <div className="space-y-3 border-t border-border pt-6 text-sm">
-              <Row k="Tree rent" v={`${cost.rent.toFixed(4)}`} />
-              <Row k={`${numNfts.toLocaleString()} mints`} v={`${cost.mint.toFixed(4)}`} />
-              <Row k="Compression" v={`${cost.compression.toFixed(4)}`} />
+              <Row k="Tree rent" v={`${treeRent.toFixed(4)}`} />
+              <Row k={`${numNfts.toLocaleString()} mints`} v={`${mintCost.toFixed(6)}`} />
             </div>
 
             <div className="border-t border-border pt-6">
               <Badge variant="success">~99% cheaper than legacy mint</Badge>
               <p className="mt-3 text-xs text-muted-foreground">
-                A standard mint for the same volume would cost about{' '}
-                <span className="font-mono text-foreground">{(numNfts * 0.012).toFixed(2)} SOL</span>.
+                Legacy equivalent for {numNfts.toLocaleString()} items:{' '}
+                <span className="font-mono text-foreground">
+                  {(numNfts * 0.012).toFixed(2)} SOL
+                </span>
+                .
               </p>
             </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Create collection'}
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={submitting || !wallet.connected}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Submitting…
+                </>
+              ) : !wallet.connected ? (
+                'Connect wallet to continue'
+              ) : (
+                <>
+                  <Sparkles className="size-4" /> Create collection on-chain
+                </>
+              )}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              Demo mode — values are not persisted.
+              Real transactions · requires {total.toFixed(3)}+ SOL · signed by your connected wallet.
             </p>
           </aside>
         </form>
@@ -251,4 +379,14 @@ function Row({ k, v }: { k: string; v: string }) {
       <span className="font-mono text-foreground">{v} SOL</span>
     </div>
   );
+}
+
+function bs58(bytes: Uint8Array): string {
+  try {
+    return bs58Pkg.encode(bytes);
+  } catch {
+    return Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
 }

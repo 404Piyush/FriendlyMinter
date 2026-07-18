@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
@@ -5,41 +7,28 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Play, Pause } from 'lucide-react';
+import { useStore } from '@/lib/store';
 
-const jobs = [
-  {
-    id: 'job-1',
-    collection: 'Solana Genesis Pixels',
-    status: 'Processing',
-    variant: 'default' as const,
-    minted: 642,
-    total: 1000,
-    rate: '53 / sec',
-    cost: '0.0063 SOL',
-  },
-  {
-    id: 'job-2',
-    collection: 'On-chain Receipts',
-    status: 'Completed',
-    variant: 'success' as const,
-    minted: 2500,
-    total: 2500,
-    rate: '—',
-    cost: '0.0187 SOL',
-  },
-  {
-    id: 'job-3',
-    collection: 'DeGods Lite',
-    status: 'Pending',
-    variant: 'muted' as const,
-    minted: 0,
-    total: 5000,
-    rate: '—',
-    cost: '~0.0250 SOL',
-  },
-];
+const STATUS_VARIANT: Record<string, 'success' | 'default' | 'secondary' | 'muted' | 'destructive'> = {
+  COMPLETED: 'success',
+  PROCESSING: 'default',
+  PENDING: 'secondary',
+  PAUSED: 'muted',
+  FAILED: 'destructive',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  COMPLETED: 'Completed',
+  PROCESSING: 'Processing',
+  PENDING: 'Pending',
+  PAUSED: 'Paused',
+  FAILED: 'Failed',
+};
 
 export default function JobsPage() {
+  const jobs = useStore((s) => s.jobs);
+  const collections = useStore((s) => s.collections);
+
   return (
     <div>
       <Header />
@@ -48,7 +37,9 @@ export default function JobsPage() {
           <div>
             <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">Jobs</h1>
             <p className="mt-3 max-w-md text-muted-foreground">
-              Background batch mint jobs. Pause, resume, inspect.
+              {jobs.length === 0
+                ? 'No mint jobs yet. Create a collection to start a job.'
+                : 'Per-browser mint sessions. Clear localStorage to reset.'}
             </p>
           </div>
           <Button asChild>
@@ -56,57 +47,74 @@ export default function JobsPage() {
           </Button>
         </div>
 
-        <div className="space-y-px bg-border">
-          {jobs.map((job) => (
-            <Card key={job.id} className="rounded-none bg-background">
-              <CardContent className="py-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={job.variant}>{job.status}</Badge>
-                      <span className="font-mono text-xs text-muted-foreground">{job.id}</span>
+        {jobs.length === 0 ? (
+          <div className="border border-dashed border-border bg-background p-12 text-center text-muted-foreground">
+            No jobs. Every collection starts a job when you open it.
+          </div>
+        ) : (
+          <div className="space-y-px bg-border">
+            {jobs.map((job) => {
+              const col = collections.find((c) => c.id === job.collectionId);
+              return (
+                <Card key={job.id} className="rounded-none bg-background">
+                  <CardContent className="py-6">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={STATUS_VARIANT[job.status] ?? 'muted'}>
+                            {STATUS_LABEL[job.status] ?? job.status}
+                          </Badge>
+                          <span className="font-mono text-xs text-muted-foreground">{job.id}</span>
+                        </div>
+                        <Link
+                          href={`/collections/${job.collectionId}`}
+                          className="mt-2 block text-xl font-semibold tracking-tight hover:underline"
+                        >
+                          {col?.name ?? 'Unknown collection'}
+                        </Link>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Mints <span className="font-mono text-foreground">{job.minted.toLocaleString()}</span> · Failed{' '}
+                          <span className="font-mono text-foreground">{job.failed.toLocaleString()}</span> · Total{' '}
+                          <span className="font-mono text-foreground">{job.total.toLocaleString()}</span>
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {job.status === 'PROCESSING' && (
+                          <Button variant="outline" size="sm">
+                            <Pause className="size-4" />
+                            Pause
+                          </Button>
+                        )}
+                        {job.status === 'PENDING' && (
+                          <Button size="sm" asChild>
+                            <Link href={`/collections/${job.collectionId}`}>
+                              <Play className="size-4" />
+                              Start
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    <h2 className="mt-2 text-xl font-semibold tracking-tight">
-                      {job.collection}
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Rate <span className="font-mono text-foreground">{job.rate}</span> · Cost{' '}
-                      <span className="font-mono text-foreground">{job.cost}</span>
-                    </p>
-                  </div>
 
-                  <div className="flex gap-2">
-                    {job.status === 'Processing' && (
-                      <Button variant="outline" size="sm">
-                        <Pause className="size-4" />
-                        Pause
-                      </Button>
-                    )}
-                    {job.status === 'Pending' && (
-                      <Button size="sm">
-                        <Play className="size-4" />
-                        Start
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>
-                      {job.minted.toLocaleString()} / {job.total.toLocaleString()} (
-                      {((job.minted / job.total) * 100).toFixed(1)}%)
-                    </span>
-                  </div>
-                  <Progress
-                    value={(job.minted / job.total) * 100}
-                    className="mt-2 h-px [&>div]:bg-primary"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    <div className="mt-6">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          {job.minted.toLocaleString()} / {job.total.toLocaleString()} (
+                          {((job.minted / Math.max(1, job.total)) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                      <Progress
+                        value={(job.minted / Math.max(1, job.total)) * 100}
+                        className="mt-2 h-px [&>div]:bg-primary"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </main>
     </div>
   );
