@@ -23,8 +23,7 @@ const FIXED_BUFFER_SIZE = 64;
 
 interface Preset {
   label: string;
-  sublabel: string;
-  description: string;
+  capacity: string;
   params: TreeParams;
   suggestedItems: number;
 }
@@ -32,29 +31,25 @@ interface Preset {
 const PRESETS: Preset[] = [
   {
     label: "S",
-    sublabel: "~16K cNFTs",
-    description: "Small collection — single project launch, limited drop",
+    capacity: "~16K cNFTs",
     params: { maxDepth: 14, maxBufferSize: 64, canopyDepth: 13 },
     suggestedItems: 1_000,
   },
   {
     label: "M",
-    sublabel: "~131K cNFTs",
-    description: "Mid-size collection — gated community, ongoing release",
+    capacity: "~131K cNFTs",
     params: { maxDepth: 17, maxBufferSize: 64, canopyDepth: 16 },
     suggestedItems: 10_000,
   },
   {
     label: "L",
-    sublabel: "~1M cNFTs",
-    description: "Large collection — game assets, loyalty rewards",
+    capacity: "~1M cNFTs",
     params: { maxDepth: 20, maxBufferSize: 64, canopyDepth: 19 },
     suggestedItems: 100_000,
   },
   {
     label: "XL",
-    sublabel: "~16M cNFTs",
-    description: "Massive — platform-level, ecosystem infrastructure",
+    capacity: "~16M cNFTs",
     params: { maxDepth: 24, maxBufferSize: 64, canopyDepth: 23 },
     suggestedItems: 1_000_000,
   },
@@ -122,13 +117,6 @@ function treeCapacity(maxDepth: number): string {
   return String(leaves);
 }
 
-function suggestedForDepth(maxDepth: number): number {
-  if (maxDepth <= 14) return 1_000;
-  if (maxDepth <= 17) return 10_000;
-  if (maxDepth <= 20) return 100_000;
-  return 1_000_000;
-}
-
 export default function CreateCollectionPage() {
   const [step, setStep] = useState(0);
   const [completed, setCompleted] = useState<boolean[]>([false, false, false, false]);
@@ -140,6 +128,7 @@ export default function CreateCollectionPage() {
   const [numNfts, setNumNfts] = useState(1000);
   const [maxDepth, setMaxDepth] = useState(14);
   const [canopyDepth, setCanopyDepth] = useState(0);
+  const [advanced, setAdvanced] = useState(false);
   const wallet = useWallet();
   const [submitting, setSubmitting] = useState(false);
 
@@ -279,10 +268,9 @@ export default function CreateCollectionPage() {
                 label={
                   <span className="inline-flex items-center gap-2">
                     Name
-                    <InfoHint text="The full name of your collection. Shown in wallets, marketplaces, and the Solana explorer. Max 64 characters." />
+                    <InfoHint text="The full name of your collection. Shown in wallets, marketplaces, and the Solana explorer." />
                   </span>
                 }
-                hint="Max 64 chars"
               >
                 <Input
                   placeholder="e.g. Solana Genesis Pixels"
@@ -296,10 +284,9 @@ export default function CreateCollectionPage() {
                 label={
                   <span className="inline-flex items-center gap-2">
                     Symbol
-                    <InfoHint text="A short ticker for your collection (think stock symbol). Shown next to every item in this collection. Max 10 characters, UPPERCASE." />
+                    <InfoHint text="A short ticker for your collection. Shown next to every item. UPPERCASE." />
                   </span>
                 }
-                hint="Max 10 chars · UPPERCASE"
               >
                 <Input
                   placeholder="e.g. GPX"
@@ -313,10 +300,9 @@ export default function CreateCollectionPage() {
                 label={
                   <span className="inline-flex items-center gap-2">
                     Description
-                    <InfoHint text="Optional. A short pitch for your collection. Shown in marketplaces." />
+                    <InfoHint text="Optional. Shown in marketplaces." />
                   </span>
                 }
-                hint="Optional · Max 500 chars"
               >
                 <Textarea
                   placeholder="A pixel-art series of 1,000 generative collectibles on Solana."
@@ -330,10 +316,9 @@ export default function CreateCollectionPage() {
                 label={
                   <span className="inline-flex items-center gap-2">
                     Cover image
-                    <InfoHint text="HTTPS link to a PNG or JPG. Shown as the collection thumbnail on marketplaces. Stored permanently on-chain as part of the metadata." />
+                    <InfoHint text="Optional. HTTPS link to a PNG or JPG. Shown as the collection thumbnail." />
                   </span>
                 }
-                hint="Optional · HTTPS only"
               >
                 <Input
                   placeholder="https://example.com/cover.png"
@@ -351,17 +336,9 @@ export default function CreateCollectionPage() {
                   <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
                     Tree size
                   </span>
-                  <InfoHint
-                    text={`A Merkle tree is the on-chain account that stores every compressed NFT in your collection. "Tree size" sets the maximum number of NFTs it can hold — you can't resize it later, so pick the smallest preset that fits.
-
-• Tree rent (paid once): ~0.005 SOL × 2^depth. Depth 14 ≈ 0.13 SOL. Depth 24 ≈ 5.6 SOL.
-• Per-item mint cost: ~0.00001 SOL. The rent is the big number.
-• Choose by rough collection size: S for ≤16K, M for ≤131K, L for ≤1M, XL for ≤16M.
-
-Clicking a preset auto-fills the depth, canopy, and a suggested item count below.`}
-                  />
+                  <InfoHint text="A Merkle tree is the on-chain account that stores every cNFT in your collection. Tree size sets how many it can hold — you can't resize it later. Pick the smallest preset that fits." />
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-4">
                   {PRESETS.map((p) => {
                     const active =
                       maxDepth === p.params.maxDepth && canopyDepth === p.params.canopyDepth;
@@ -370,24 +347,15 @@ Clicking a preset auto-fills the depth, canopy, and a suggested item count below
                         key={p.label}
                         type="button"
                         onClick={() => setPreset(p)}
-                        title={p.description}
-                        className={`flex flex-col items-start gap-1.5 rounded-2xl p-4 text-left transition-shadow ${
+                        className={`flex flex-col items-center gap-1 rounded-2xl py-5 transition-shadow ${
                           active
                             ? 'bg-background text-foreground shadow-[inset_4px_4px_8px_rgba(150,130,100,0.32),inset_-4px_-4px_8px_rgba(255,255,255,1)]'
                             : 'bg-background text-foreground shadow-[-4px_-4px_8px_rgba(255,255,255,0.9),4px_4px_8px_rgba(150,130,100,0.28)] active:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.28),inset_-3px_-3px_6px_rgba(255,255,255,0.9)]'
                         }`}
                       >
-                        <div className="flex w-full items-baseline justify-between">
-                          <span className="text-3xl font-semibold tracking-tight">{p.label}</span>
-                          <span className={`font-mono text-[10px] uppercase tracking-[0.15em] ${active ? 'text-foreground/70' : 'text-muted-foreground'}`}>
-                            Recommended
-                          </span>
-                        </div>
+                        <span className="text-3xl font-semibold tracking-tight">{p.label}</span>
                         <span className={`font-mono text-xs ${active ? 'text-foreground/90' : 'text-muted-foreground'}`}>
-                          {p.sublabel}
-                        </span>
-                        <span className={`text-[11px] leading-snug ${active ? 'text-foreground/70' : 'text-muted-foreground'}`}>
-                          {p.description}
+                          {p.capacity}
                         </span>
                       </button>
                     );
@@ -395,44 +363,52 @@ Clicking a preset auto-fills the depth, canopy, and a suggested item count below
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field
-                  label={
-                    <span className="inline-flex items-center gap-2">
-                      Depth
-                      <InfoHint text="The 'depth' of the Merkle tree sets how many leaves it can hold: 2^depth leaves. Depth 14 = ~16K cNFTs. Depth 20 = ~1M cNFTs. Bigger = more rent up front." />
-                    </span>
-                  }
-                  hint="Recommended: 14 (S) · 17 (M) · 20 (L) · 24 (XL)"
-                >
-                  <Input
-                    type="number"
-                    min={3}
-                    max={30}
-                    value={maxDepth}
-                    onChange={(e) => setMaxDepth(Number(e.target.value))}
-                    className="font-mono"
-                  />
-                </Field>
-                <Field
-                  label={
-                    <span className="inline-flex items-center gap-2">
-                      Canopy
-                      <InfoHint text="The canopy caches proof data off-chain so each mint is smaller on-chain. Must be less than depth. Recommended: depth − 1." />
-                    </span>
-                  }
-                  hint={`Recommended: ${Math.max(0, maxDepth - 1)} (= depth − 1)`}
-                >
-                  <Input
-                    type="number"
-                    min={0}
-                    max={Math.max(0, maxDepth - 1)}
-                    value={canopyDepth}
-                    onChange={(e) => setCanopyDepth(Number(e.target.value))}
-                    className="font-mono"
-                  />
-                </Field>
-              </div>
+              <button
+                type="button"
+                onClick={() => setAdvanced((a) => !a)}
+                className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground"
+              >
+                {advanced ? '− Hide advanced' : '+ Advanced: depth & canopy'}
+              </button>
+
+              {advanced && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label={
+                      <span className="inline-flex items-center gap-2">
+                        Depth
+                        <InfoHint text="The 'depth' of the Merkle tree sets how many leaves it can hold: 2^depth leaves. Depth 14 = ~16K cNFTs. Depth 20 = ~1M cNFTs. Bigger = more rent up front." />
+                      </span>
+                    }
+                  >
+                    <Input
+                      type="number"
+                      min={3}
+                      max={30}
+                      value={maxDepth}
+                      onChange={(e) => setMaxDepth(Number(e.target.value))}
+                      className="font-mono"
+                    />
+                  </Field>
+                  <Field
+                    label={
+                      <span className="inline-flex items-center gap-2">
+                        Canopy
+                        <InfoHint text="The canopy caches proof data off-chain so each mint is smaller on-chain. Must be less than depth." />
+                      </span>
+                    }
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      max={Math.max(0, maxDepth - 1)}
+                      value={canopyDepth}
+                      onChange={(e) => setCanopyDepth(Number(e.target.value))}
+                      className="font-mono"
+                    />
+                  </Field>
+                </div>
+              )}
             </div>
           )}
 
@@ -442,10 +418,9 @@ Clicking a preset auto-fills the depth, canopy, and a suggested item count below
                 label={
                   <span className="inline-flex items-center gap-2">
                     Items
-                    <InfoHint text={`How many compressed NFTs you plan to mint into this tree. The tree holds up to ${treeCapacity(maxDepth)} leaves; you don't have to use them all. Minting more items costs ~0.00001 SOL per item.`} />
+                    <InfoHint text={`How many compressed NFTs you plan to mint into this tree. Tree holds up to ${treeCapacity(maxDepth)} leaves.`} />
                   </span>
                 }
-                hint={`Recommended for depth ${maxDepth}: ${suggestedForDepth(maxDepth).toLocaleString()}`}
               >
                 <Input
                   type="number"
@@ -457,18 +432,10 @@ Clicking a preset auto-fills the depth, canopy, and a suggested item count below
                 />
               </Field>
 
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                    Quick amounts
-                  </span>
-                  <InfoHint text="Pick a common size to fill in. You can fine-tune the number above." />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {[100, 1000, 10_000, 100_000, 1_000_000].map((v) => (
-                    <QuickAmount key={v} value={v} current={numNfts} onClick={setNumNfts} />
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {[100, 1000, 10_000, 100_000, 1_000_000].map((v) => (
+                  <QuickAmount key={v} value={v} current={numNfts} onClick={setNumNfts} />
+                ))}
               </div>
             </div>
           )}
