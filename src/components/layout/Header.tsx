@@ -9,6 +9,26 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Coins, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+function NavLink({ href, name, isActive }: { href: string; name: string; isActive: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "group relative cursor-pointer px-3 py-1.5 text-sm transition-colors duration-150",
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      <span>{name}</span>
+      <span
+        className={cn(
+          "pointer-events-none absolute inset-x-2 -bottom-px h-px origin-left scale-x-0 bg-foreground transition-transform duration-200 ease-out",
+          isActive && "scale-x-100"
+        )}
+      />
+    </Link>
+  );
+}
+
 const navItems = [
   { name: "Dashboard", href: "/" },
   { name: "Collections", href: "/collections" },
@@ -35,18 +55,12 @@ export const Header: React.FC = () => {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
+              <NavLink
                 key={item.name}
                 href={item.href}
-                className={cn(
-                  "px-3 py-1.5 text-sm transition-colors",
-                  isActive
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.name}
-              </Link>
+                name={item.name}
+                isActive={isActive}
+              />
             );
           })}
         </nav>

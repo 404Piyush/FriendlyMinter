@@ -270,7 +270,7 @@ export function MyComponent() {
 
             {/* Tech stack */}
             <Section id="tech-stack" title="Tech stack">
-              <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
                 {stackRows.map((row) => (
                   <div key={row.title} className="bg-background p-5">
                     <h4 className="text-sm font-medium">{row.title}</h4>

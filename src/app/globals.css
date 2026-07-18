@@ -1,0 +1,292 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: var(--font-jbmono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+:root {
+  --background: #0a0a09;
+  --foreground: #ededed;
+  --card: #111110;
+  --card-foreground: #ededed;
+  --popover: #111110;
+  --popover-foreground: #ededed;
+
+  --primary: #d3ff48;
+  --primary-foreground: #0a0a09;
+
+  --secondary: #1c1c1a;
+  --secondary-foreground: #ededed;
+
+  --muted: #161615;
+  --muted-foreground: #757570;
+
+  --accent: #ededed;
+  --accent-foreground: #0a0a09;
+
+  --destructive: #ff5555;
+  --destructive-foreground: #0a0a09;
+
+  --success: #6ee7a3;
+  --success-foreground: #0a0a09;
+
+  --border: #262624;
+  --input: #262624;
+  --ring: #d3ff48;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  ::selection {
+    background: #d3ff48;
+    color: #0a0a09;
+  }
+
+  /* Better default focus ring */
+  :focus-visible {
+    outline: 1px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Interactive element cursors — make it obvious what's clickable */
+  a, button, [role="button"], label[for], summary, select, input[type="submit"], input[type="button"] {
+    cursor: pointer;
+  }
+  input[type="text"], input[type="email"], input[type="number"], input[type="search"], input[type="url"], input[type="password"], textarea {
+    cursor: text;
+  }
+  a[href=""], a:not([href]) {
+    cursor: default;
+  }
+  [disabled], [aria-disabled="true"] {
+    cursor: not-allowed !important;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: var(--font-jbmono), ui-monospace, monospace;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.7); }
+  }
+  .live-dot {
+    animation: livePulse 1.6s ease-in-out infinite;
+  }
+
+  /* Subtle sweep for active nav underline on initial render */
+  @keyframes underlineSweep {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Custom scrollbars — themed, thin, animated, hover-grow
+   --------------------------------------------------------------------------- */
+
+* {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.25s ease;
+}
+
+*:hover {
+  scrollbar-color: #3a3a36 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 0;
+  transition: background 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: #3a3a36;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #d3ff48;
+}
+/* Firefox animates the thumb on hover via scrollbar-color above */
+*:hover::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb:active {
+  background: #d3ff48;
+}
+
+/* Auto-show scrollbars only on scroll. Hide idle ones. */
+html {
+  scrollbar-gutter: stable;
+}
+body {
+  scrollbar-gutter: stable;
+}
+
+/* ---------------------------------------------------------------------------
+   Wallet-adapter-react-ui overrides
+   - Modal: dark, sharp, no radius
+   - Buttons: match our button system
+   - List items: dark cards
+   --------------------------------------------------------------------------- */
+
+.wallet-adapter-modal-wrapper {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(6px);
+}
+
+.wallet-adapter-modal {
+  background: #111110 !important;
+  border: 1px solid #262624 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-inter), system-ui, sans-serif !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #ededed !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  font-size: 1.125rem !important;
+  border-bottom: 1px solid #262624 !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.wallet-adapter-modal-list {
+  padding: 0.75rem !important;
+  gap: 2px !important;
+  background: transparent !important;
+}
+
+.wallet-adapter-modal-list-header,
+.wallet-adapter-modal-list-more {
+  color: #757570 !important;
+  font-size: 0.75rem !important;
+  font-family: var(--font-jbmono), ui-monospace, monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.18em !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button,
+.wallet-adapter-modal-list-item {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #ededed !important;
+  font-family: var(--font-inter), system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0 !important;
+  height: auto !important;
+  transition: background-color 0.18s ease, border-color 0.18s ease !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover,
+.wallet-adapter-modal-list-item:hover {
+  background: #1c1c1a !important;
+  border-color: #262624 !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button-start-icon,
+.wallet-adapter-modal-list-item svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: transparent !important;
+  color: #757570 !important;
+  border-radius: 0 !important;
+  transition: color 0.15s ease, background 0.15s ease !important;
+}
+.wallet-adapter-modal-button-close:hover {
+  color: #ededed !important;
+  background: #1c1c1a !important;
+}
+
+/* The trigger button uses the same class hierarchy as our Button component */
+.wallet-adapter-button.wallet-adapter-button-trigger {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-inter), system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  height: 2.5rem !important;
+  padding: 0 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: background-color 0.18s ease !important;
+  cursor: pointer !important;
+}
+.wallet-adapter-button.wallet-adapter-button-trigger:hover {
+  background: color-mix(in oklab, var(--primary) 85%, black) !important;
+}
+.wallet-adapter-button-trigger-icon {
+  filter: invert(1) !important; /* make the default chevron dark on lime */
+}
+
+/* Hide the "more options" chevron arrow on list items, they look stock */
+.wallet-adapter-modal-list-more-icon {
+  display: none !important;
+}
