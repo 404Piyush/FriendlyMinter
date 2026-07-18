@@ -64,10 +64,13 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const message = (err as Error).message;
-    console.error('[/api/collections POST]', message);
+    const e = err as Error & { cause?: unknown; logs?: unknown[] };
+    const message = e.message;
+    const cause = e.cause ? String((e.cause as { message?: string }).message ?? e.cause) : undefined;
+    const stack = e.stack?.split('\n').slice(0, 4).join(' | ');
+    console.error('[/api/collections POST]', message, cause, stack);
     return NextResponse.json(
-      { error: 'Failed to create Merkle tree', details: message },
+      { error: 'Failed to create Merkle tree', details: message, cause, stack },
       { status: 500 }
     );
   }
