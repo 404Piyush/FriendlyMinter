@@ -18,7 +18,7 @@ interface TreeParams {
 
 const presets: Array<{ label: string; params: TreeParams; capacity: string }> = [
   { label: 'Tiny', params: { maxDepth: 3, maxBufferSize: 8, canopyDepth: 0 }, capacity: '~8 NFTs' },
-  { label: 'Small', params: { maxDepth: 10, maxBufferSize: 16, canopyDepth: 3 }, capacity: '~1K' },
+  { label: 'Small', params: { maxDepth: 10, maxBufferSize: 8, canopyDepth: 3 }, capacity: '~1K' },
   { label: 'Medium', params: { maxDepth: 14, maxBufferSize: 64, canopyDepth: 0 }, capacity: '~16K' },
   { label: 'Large', params: { maxDepth: 17, maxBufferSize: 64, canopyDepth: 0 }, capacity: '~131K' },
   { label: 'XL', params: { maxDepth: 20, maxBufferSize: 64, canopyDepth: 0 }, capacity: '~1M' },

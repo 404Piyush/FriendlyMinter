@@ -4,6 +4,7 @@ import { createMerkleTree } from '@/lib/server/collections';
 import { isBackendLive } from '@/lib/server/umi';
 import { getDeployerPubkey } from '@/lib/server/wallet';
 import { accountUrl, explorerUrl } from '@/lib/server/umi';
+import { isValidTreeConfig, nearestValidConfig } from '@/lib/server/tree-config';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -33,6 +34,18 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     return NextResponse.json(
       { error: 'Invalid request body', details: (err as Error).message },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidTreeConfig(parsed.maxDepth, parsed.maxBufferSize)) {
+    const suggested = nearestValidConfig(parsed.maxDepth, parsed.maxBufferSize);
+    return NextResponse.json(
+      {
+        error: 'Invalid tree config',
+        details: `Bubblegum does not accept (maxDepth=${parsed.maxDepth}, maxBufferSize=${parsed.maxBufferSize}).`,
+        suggested,
+      },
       { status: 400 }
     );
   }
