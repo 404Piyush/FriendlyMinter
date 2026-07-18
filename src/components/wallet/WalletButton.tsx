@@ -19,7 +19,7 @@ export function WalletButton() {
   if (!mounted) {
     return (
       <button
-        className="inline-flex h-10 items-center justify-center bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
+        className="inline-flex h-10 items-center justify-center bg-sol-gradient-horizontal px-4 text-sm font-medium text-primary-foreground transition-all duration-150 hover:opacity-90"
         disabled
       >
         Loading…
@@ -58,7 +58,7 @@ export function WalletButton() {
   return (
     <button
       onClick={() => setVisible(true)}
-      className="group inline-flex h-10 items-center gap-2 bg-primary px-4 text-sm font-medium text-primary-foreground transition-all duration-150 ease-out hover:bg-primary/85 active:translate-y-px"
+      className="group inline-flex h-10 items-center gap-2 bg-sol-gradient-horizontal px-4 text-sm font-medium text-primary-foreground transition-all duration-150 ease-out hover:opacity-90 active:translate-y-px"
     >
       {connecting ? (
         <>

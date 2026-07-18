@@ -6,8 +6,28 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { WalletButton } from "@/components/wallet/WalletButton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Coins, Settings } from "lucide-react";
+import { Menu, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function SolMark({ size = 18 }: { size?: number }) {
+  // A stylised Solana "S" mark. Sharp, symmetric, three horizontal bars with
+  // a centre disc — clearly inspired by the Solana logotype without being a
+  // pixel-for-pixel copy.
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      style={{ flexShrink: 0 }}
+    >
+      <rect x="2" y="5" width="20" height="2.5" fill="currentColor" />
+      <rect x="2" y="10.75" width="20" height="2.5" fill="currentColor" opacity="0.7" />
+      <rect x="2" y="16.5" width="20" height="2.5" fill="currentColor" />
+    </svg>
+  );
+}
 
 function NavLink({ href, name, isActive }: { href: string; name: string; isActive: boolean }) {
   return (
@@ -44,11 +64,13 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center bg-primary text-primary-foreground">
-            <Coins className="size-4" strokeWidth={2.5} />
+        <Link href="/" className="group flex items-center gap-2.5">
+          <div className="relative flex size-9 items-center justify-center bg-sol-gradient text-primary-foreground shadow-[0_0_0_1px_rgba(153,69,255,0.4),0_4px_18px_-4px_rgba(153,69,255,0.5)] transition-transform duration-200 group-hover:scale-105">
+            <SolMark size={18} />
           </div>
-          <span className="text-base font-semibold tracking-tight">FriendlyMinter</span>
+          <span className="text-base font-semibold tracking-tight">
+            Friendly<span className="text-sol-gradient">Minter</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -84,10 +106,12 @@ export const Header: React.FC = () => {
             <SheetContent side="right" className="w-[300px] border-l border-border bg-background p-0">
               <div className="border-b border-border p-5">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-8 items-center justify-center bg-primary text-primary-foreground">
-                    <Coins className="size-4" strokeWidth={2.5} />
+                  <div className="relative flex size-9 items-center justify-center bg-sol-gradient text-primary-foreground">
+                    <SolMark size={18} />
                   </div>
-                  <span className="text-base font-semibold tracking-tight">FriendlyMinter</span>
+                  <span className="text-base font-semibold tracking-tight">
+                    Friendly<span className="text-sol-gradient">Minter</span>
+                  </span>
                 </div>
               </div>
               <nav className="flex flex-col p-3">

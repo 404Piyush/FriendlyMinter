@@ -271,8 +271,8 @@ export default function CreateCollectionPage() {
                       onClick={() => setParams(p.params)}
                       className={`group anim-preset cursor-pointer border px-3 py-1.5 text-sm ${
                         active
-                          ? 'border-primary bg-primary text-primary-foreground shadow-[0_0_0_3px_rgba(211,255,72,0.15)]'
-                          : 'border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground'
+                          ? 'border-white/10 bg-sol-gradient text-primary-foreground shadow-[0_0_0_3px_rgba(20,241,149,0.18)]'
+                          : 'border-border bg-background text-muted-foreground hover:border-sol-purple/50 hover:text-foreground'
                       }`}
                     >
                       <span className="font-medium">{p.label}</span>
@@ -305,20 +305,20 @@ export default function CreateCollectionPage() {
           {/* Cost summary — animated, USP-forward */}
           <aside className="space-y-8 lg:sticky lg:top-24 lg:self-start">
             {/* USP — animated savings callout */}
-            <div className="relative overflow-hidden border border-primary/40 bg-primary p-6 text-primary-foreground anim-fade-up anim-stagger-3">
+            <div className="relative overflow-hidden border border-white/10 bg-sol-gradient p-6 text-primary-foreground anim-fade-up anim-stagger-3 shadow-[0_8px_40px_-12px_rgba(153,69,255,0.5)]">
               <div className="anim-shimmer-bar" />
               <div className="absolute inset-0 -z-0 opacity-30">
-                <div className="absolute -right-6 -top-6 size-32 rounded-full bg-primary-foreground/20 blur-2xl" />
-                <div className="absolute -left-6 -bottom-6 size-32 rounded-full bg-primary-foreground/10 blur-2xl" />
+                <div className="absolute -right-6 -top-6 size-32 rounded-full bg-white/20 blur-2xl" />
+                <div className="absolute -left-6 -bottom-6 size-32 rounded-full bg-white/10 blur-2xl" />
               </div>
               <div className="relative">
                 <div className="flex items-center gap-2">
                   <Sparkles className="size-4 anim-sparkle" />
-                  <span className="text-xs font-medium uppercase tracking-[0.18em]">
+                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-primary-foreground/90">
                     You save
                   </span>
                 </div>
-                <div className="anim-savings mt-3 text-6xl font-semibold tracking-tighter tabular-nums">
+                <div className="anim-savings mt-3 text-6xl font-semibold tracking-tighter tabular-nums text-primary-foreground">
                   {Math.max(0, animatedSavings).toFixed(1)}
                   <span className="ml-1 text-2xl">%</span>
                 </div>
@@ -330,9 +330,9 @@ export default function CreateCollectionPage() {
                 <div className="mt-5 space-y-2">
                   <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
                     <span className="w-12 shrink-0 text-primary-foreground/70">Legacy</span>
-                    <div className="relative h-2 flex-1 bg-primary-foreground/20">
+                    <div className="relative h-2 flex-1 bg-white/20">
                       <div
-                        className="absolute inset-y-0 left-0 right-0 bg-primary-foreground anim-bar-grow"
+                        className="absolute inset-y-0 left-0 right-0 bg-white anim-bar-grow"
                         style={{ animationDuration: '0.4s' }}
                       />
                     </div>
@@ -342,9 +342,9 @@ export default function CreateCollectionPage() {
                   </div>
                   <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
                     <span className="w-12 shrink-0 text-primary-foreground/70">You</span>
-                    <div className="relative h-2 flex-1 bg-primary-foreground/20">
+                    <div className="relative h-2 flex-1 bg-white/20">
                       <div
-                        className="absolute inset-y-0 left-0 bg-primary-foreground anim-bar-grow"
+                        className="absolute inset-y-0 left-0 bg-white anim-bar-grow"
                         style={{
                           width: `${Math.max(2, (cost.total / Math.max(legacyCost, 0.0001)) * 100)}%`,
                           animationDuration: '0.5s',
@@ -381,17 +381,17 @@ export default function CreateCollectionPage() {
               >
                 <div
                   key={`rent-${rentPct.toFixed(0)}`}
-                  className="h-full bg-primary anim-bar-grow"
+                  className="h-full bg-sol-gradient-horizontal anim-bar-grow"
                   style={{ width: `${rentPct}%`, animationDuration: '0.4s' }}
                 />
                 <div
                   key={`mint-${mintPct.toFixed(0)}`}
-                  className="h-full bg-foreground/60 anim-bar-grow"
+                  className="h-full bg-sol-purple/80 anim-bar-grow"
                   style={{ width: `${mintPct}%`, animationDuration: '0.5s', animationDelay: '60ms' }}
                 />
                 <div
                   key={`comp-${compPct.toFixed(0)}`}
-                  className="h-full bg-muted-foreground anim-bar-grow"
+                  className="h-full bg-sol-green/80 anim-bar-grow"
                   style={{ width: `${compPct}%`, animationDuration: '0.6s', animationDelay: '120ms' }}
                 />
               </div>
@@ -399,12 +399,12 @@ export default function CreateCollectionPage() {
                 <Row
                   k="Tree rent"
                   v={`${animatedRent.toFixed(4)}`}
-                  swatch="bg-primary"
+                  swatch="bg-sol-gradient"
                   emphasize={rentPct > 70}
                   hint={rentPct > 70 ? 'Dominant cost — bigger tree = more rent up front' : undefined}
                 />
-                <Row k={`${numNfts.toLocaleString()} mints`} v={`${animatedMint.toFixed(4)}`} swatch="bg-foreground/60" />
-                <Row k="Compression" v={`${animatedComp.toFixed(4)}`} swatch="bg-muted-foreground" />
+                <Row k={`${numNfts.toLocaleString()} mints`} v={`${animatedMint.toFixed(4)}`} swatch="bg-sol-purple/80" />
+                <Row k="Compression" v={`${animatedComp.toFixed(4)}`} swatch="bg-sol-green/80" />
               </div>
             </div>
 
@@ -458,8 +458,8 @@ function Row({
           {k}
         </span>
         <span
-          className={`font-mono tabular-nums ${
-            emphasize ? 'text-primary' : 'text-foreground'
+          className={`font-mono tabular-nums transition-colors ${
+            emphasize ? 'text-sol-gradient font-semibold' : 'text-foreground'
           }`}
         >
           {v} SOL

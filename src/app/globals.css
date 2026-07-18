@@ -36,34 +36,45 @@
 }
 
 :root {
-  --background: #0a0a09;
+  --background: #08080a;
   --foreground: #ededed;
-  --card: #111110;
+  --card: #0f0f12;
   --card-foreground: #ededed;
-  --popover: #111110;
+  --popover: #0f0f12;
   --popover-foreground: #ededed;
 
-  --primary: #d3ff48;
-  --primary-foreground: #0a0a09;
+  /* Solana palette */
+  --sol-purple: #9945ff;
+  --sol-green: #14f195;
+  --sol-cyan: #00d4ff;
+  --sol-magenta: #ff4ecd;
+  --sol-gradient: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+  --sol-gradient-soft: linear-gradient(135deg, rgba(153, 69, 255, 0.18) 0%, rgba(20, 241, 149, 0.18) 100%);
+  --sol-gradient-horizontal: linear-gradient(90deg, #9945ff 0%, #14f195 100%);
 
-  --secondary: #1c1c1a;
+  /* Primary maps to Solana green — high-contrast on black */
+  --primary: #14f195;
+  --primary-foreground: #08080a;
+
+  /* Secondary maps to Solana purple */
+  --secondary: #1a1320;
   --secondary-foreground: #ededed;
 
-  --muted: #161615;
-  --muted-foreground: #757570;
+  --muted: #14141a;
+  --muted-foreground: #7c7c8a;
 
-  --accent: #ededed;
-  --accent-foreground: #0a0a09;
+  --accent: #9945ff;
+  --accent-foreground: #ededed;
 
-  --destructive: #ff5555;
+  --destructive: #ff5c7a;
   --destructive-foreground: #0a0a09;
 
-  --success: #6ee7a3;
-  --success-foreground: #0a0a09;
+  --success: #14f195;
+  --success-foreground: #08080a;
 
-  --border: #262624;
-  --input: #262624;
-  --ring: #d3ff48;
+  --border: #1f1f26;
+  --input: #16161c;
+  --ring: #14f195;
 }
 
 @layer base {
@@ -78,6 +89,10 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-inter), system-ui, sans-serif;
     font-feature-settings: "ss01", "cv11";
+    background-image:
+      radial-gradient(at 20% 0%, rgba(153, 69, 255, 0.06) 0%, transparent 40%),
+      radial-gradient(at 80% 30%, rgba(20, 241, 149, 0.04) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4 {
@@ -87,8 +102,8 @@
   }
 
   ::selection {
-    background: #d3ff48;
-    color: #0a0a09;
+    background: var(--sol-green);
+    color: #08080a;
   }
 
   /* Better default focus ring */
@@ -97,7 +112,7 @@
     outline-offset: 2px;
   }
 
-  /* Interactive element cursors — make it obvious what's clickable */
+  /* Interactive element cursors */
   a, button, [role="button"], label[for], summary, select, input[type="submit"], input[type="button"] {
     cursor: pointer;
   }
@@ -109,6 +124,17 @@
   }
   [disabled], [aria-disabled="true"] {
     cursor: not-allowed !important;
+  }
+
+  /* ---- Kill the ugly native number spinners (Chrome, Safari, Firefox, Edge) ---- */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
   }
 }
 
@@ -214,8 +240,8 @@
 
   /* ---- Input focus glow ------------------------------------------------ */
   @keyframes focusGlow {
-    0%, 100% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(211, 255, 72, 0); }
-    50% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(211, 255, 72, 0.18); }
+    0%, 100% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(20, 241, 149, 0); }
+    50% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(20, 241, 149, 0.2); }
   }
   input:focus-visible,
   textarea:focus-visible {
@@ -226,8 +252,8 @@
 
   /* ---- CTA glow pulse -------------------------------------------------- */
   @keyframes ctaGlow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(211, 255, 72, 0); }
-    50% { box-shadow: 0 0 0 6px rgba(211, 255, 72, 0.18); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(20, 241, 149, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(20, 241, 149, 0.22); }
   }
   .anim-cta {
     position: relative;
@@ -239,8 +265,40 @@
     inset: -2px;
     border-radius: inherit;
     pointer-events: none;
-    box-shadow: 0 0 0 0 rgba(211, 255, 72, 0);
+    box-shadow: 0 0 0 0 rgba(20, 241, 149, 0);
     animation: ctaGlow 2.6s ease-in-out infinite;
+  }
+
+  /* ---- Solana gradient utilities -------------------------------------- */
+  .bg-sol-gradient {
+    background-image: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+  }
+  .bg-sol-gradient-horizontal {
+    background-image: linear-gradient(90deg, #9945ff 0%, #14f195 100%);
+  }
+  .bg-sol-gradient-soft {
+    background-image: linear-gradient(135deg, rgba(153, 69, 255, 0.15) 0%, rgba(20, 241, 149, 0.15) 100%);
+  }
+  .text-sol-gradient {
+    background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .border-sol-gradient {
+    border-image: linear-gradient(135deg, #9945ff 0%, #14f195 100%) 1;
+  }
+
+  /* Moving gradient sweep across an element */
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .anim-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease-in-out infinite;
   }
 
   /* ---- Preset chip hover scale ----------------------------------------- */
@@ -313,7 +371,7 @@
   background: #3a3a36;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: #d3ff48;
+  background: var(--sol-green);
 }
 /* Firefox animates the thumb on hover via scrollbar-color above */
 *:hover::-webkit-scrollbar {
@@ -321,7 +379,7 @@
   height: 10px;
 }
 *::-webkit-scrollbar-thumb:active {
-  background: #d3ff48;
+  background: var(--sol-green);
 }
 
 /* Auto-show scrollbars only on scroll. Hide idle ones. */
@@ -414,8 +472,8 @@ body {
 
 /* The trigger button uses the same class hierarchy as our Button component */
 .wallet-adapter-button.wallet-adapter-button-trigger {
-  background: var(--primary) !important;
-  color: var(--primary-foreground) !important;
+  background: linear-gradient(90deg, #9945ff 0%, #14f195 100%) !important;
+  color: #08080a !important;
   border: 0 !important;
   border-radius: 0 !important;
   font-family: var(--font-inter), system-ui, sans-serif !important;
@@ -426,11 +484,11 @@ body {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.5rem !important;
-  transition: background-color 0.18s ease !important;
+  transition: opacity 0.18s ease !important;
   cursor: pointer !important;
 }
 .wallet-adapter-button.wallet-adapter-button-trigger:hover {
-  background: color-mix(in oklab, var(--primary) 85%, black) !important;
+  opacity: 0.9 !important;
 }
 .wallet-adapter-button-trigger-icon {
   filter: invert(1) !important; /* make the default chevron dark on lime */
