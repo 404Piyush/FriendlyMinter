@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ArrowRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 const collections = [
   {

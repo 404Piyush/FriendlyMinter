@@ -5,12 +5,10 @@ import { isBackendLive, accountUrl, explorerUrl } from "@/lib/server/umi";
 import { getDeployerPubkey } from "@/lib/server/wallet";
 import { isValidTreeConfig, nearestValidConfig } from "@/lib/server/tree-config";
 import { rateLimit, DEFAULT_BACKEND_LIMIT } from "@/lib/server/rate-limit";
-import { verifySignedRequest, AuthError } from "@/lib/server/auth";
+import { parseBody } from "@/lib/server/parse-body";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const MAX_BODY_BYTES = 8 * 1024;
 
 const bodySchema = z.object({
   name: z.string().min(1).max(64),
@@ -44,105 +42,39 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Body-size cap before we even read it.
-  const declaredLength = Number(req.headers.get("content-length") ?? "0");
-  if (declaredLength > MAX_BODY_BYTES) {
+  const parsed = await parseBody(req, bodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.body;
+  const walletPubkey = parsed.pubkey;
+
+  if (!isValidTreeConfig(body.maxDepth, body.maxBufferSize)) {
+    const suggested = nearestValidConfig(body.maxDepth, body.maxBufferSize);
     return NextResponse.json(
-      { error: "BODY_TOO_LARGE" },
-      { status: 413 }
+      { error: "INVALID_TREE_CONFIG", suggested },
+      { status: 400 }
     );
   }
 
-  const rawBody = await req.text();
-  if (rawBody.length > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: "BODY_TOO_LARGE" }, { status: 413 });
-  }
-
-  // ---- Auth (SIWS) ---------------------------------------------------
-  const auth = req.headers.get("x-auth");
-  if (!auth) {
-    return NextResponse.json(
-      { error: "AUTH_REQUIRED", code: "AUTH_REQUIRED" },
-      { status: 401 }
-    );
-  }
-
-  let signed: {
-    pubkey: string;
-    signature: string;
-    nonce: string;
-    timestamp: number;
-    method: string;
-    path: string;
-    body: string;
-  };
-  try {
-    signed = JSON.parse(auth);
-  } catch {
-    return NextResponse.json(
-      { error: "AUTH_MALFORMED", code: "AUTH_MALFORMED" },
-      { status: 401 }
-    );
-  }
-
-  let walletPubkey: string;
-  try {
-    const pk = await verifySignedRequest(signed, rawBody);
-    walletPubkey = pk.toBase58();
-  } catch (err) {
-    if (err instanceof AuthError) {
-      return NextResponse.json(
-        { error: "AUTH_REJECTED", code: err.code },
-        { status: 401 }
-      );
-    }
-    console.error("[/api/collections POST] auth verify failed");
-    return NextResponse.json(
-      { error: "AUTH_REJECTED", code: "VERIFY_FAILED" },
-      { status: 401 }
-    );
-  }
-  // --------------------------------------------------------------------
-
-  let parsed;
-  try {
-    parsed = bodySchema.parse(JSON.parse(rawBody));
-  } catch {
-    return NextResponse.json({ error: "BAD_REQUEST" }, { status: 400 });
-  }
-
-  if (!isValidTreeConfig(parsed.maxDepth, parsed.maxBufferSize)) {
-    const suggested = nearestValidConfig(parsed.maxDepth, parsed.maxBufferSize);
+  if (body.canopyDepth >= body.maxDepth) {
     return NextResponse.json(
       {
         error: "INVALID_TREE_CONFIG",
-        suggested,
+        suggested: { ...body, canopyDepth: Math.max(0, body.maxDepth - 1) },
       },
       { status: 400 }
     );
   }
 
-  if (parsed.canopyDepth >= parsed.maxDepth) {
-    return NextResponse.json(
-      {
-        error: "INVALID_TREE_CONFIG",
-        suggested: { ...parsed, canopyDepth: Math.max(0, parsed.maxDepth - 1) },
-      },
-      { status: 400 }
-    );
-  }
-
-  if (parsed.image) {
-    let parsedUrl: URL;
+  if (body.image) {
     try {
-      parsedUrl = new URL(parsed.image);
+      const u = new URL(body.image);
+      if (u.protocol !== "https:") {
+        return NextResponse.json(
+          { error: "INVALID_IMAGE_URL" },
+          { status: 400 }
+        );
+      }
     } catch {
-      return NextResponse.json(
-        { error: "INVALID_IMAGE_URL" },
-        { status: 400 }
-      );
-    }
-    if (parsedUrl.protocol !== "https:") {
       return NextResponse.json(
         { error: "INVALID_IMAGE_URL" },
         { status: 400 }
@@ -152,25 +84,25 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await createMerkleTree({
-      maxDepth: parsed.maxDepth,
-      maxBufferSize: parsed.maxBufferSize,
-      canopyDepth: parsed.canopyDepth,
+      maxDepth: body.maxDepth,
+      maxBufferSize: body.maxBufferSize,
+      canopyDepth: body.canopyDepth,
     });
 
     return NextResponse.json({
       ok: true,
       collection: {
-        name: parsed.name,
-        symbol: parsed.symbol,
-        description: parsed.description ?? "",
-        image: parsed.image ?? "",
+        name: body.name,
+        symbol: body.symbol,
+        description: body.description ?? "",
+        image: body.image ?? "",
         treeAddress: result.treeAddress,
         treeAuthority: result.treeAuthority,
         creator: getDeployerPubkey(),
         creatorSigner: walletPubkey,
-        maxDepth: parsed.maxDepth,
-        maxBufferSize: parsed.maxBufferSize,
-        canopyDepth: parsed.canopyDepth,
+        maxDepth: body.maxDepth,
+        maxBufferSize: body.maxBufferSize,
+        canopyDepth: body.canopyDepth,
         signature: result.signature,
         explorer: explorerUrl(result.signature),
         treeExplorer: accountUrl(result.treeAddress),
@@ -178,8 +110,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const e = err as Error;
-    console.error("[/api/collections POST]", e.message);
+    console.error("[/api/collections POST]", (err as Error).message);
     return NextResponse.json(
       { error: "TREE_CREATE_FAILED" },
       { status: 500 }

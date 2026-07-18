@@ -4,12 +4,10 @@ import { PublicKey } from "@solana/web3.js";
 import { mintCompressedNft } from "@/lib/server/mints";
 import { isBackendLive, explorerUrl } from "@/lib/server/umi";
 import { rateLimit, DEFAULT_BACKEND_LIMIT } from "@/lib/server/rate-limit";
-import { verifySignedRequest, AuthError } from "@/lib/server/auth";
+import { parseBody } from "@/lib/server/parse-body";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const MAX_BODY_BYTES = 8 * 1024;
 
 const mintSchema = z.object({
   treeAddress: z.string().min(32).max(64),
@@ -61,70 +59,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const declaredLength = Number(req.headers.get("content-length") ?? "0");
-  if (declaredLength > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: "BODY_TOO_LARGE" }, { status: 413 });
-  }
-  const rawBody = await req.text();
-  if (rawBody.length > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: "BODY_TOO_LARGE" }, { status: 413 });
-  }
+  const parsed = await parseBody(req, mintSchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.body;
 
-  // ---- Auth (SIWS) ---------------------------------------------------
-  const auth = req.headers.get("x-auth");
-  if (!auth) {
-    return NextResponse.json(
-      { error: "AUTH_REQUIRED", code: "AUTH_REQUIRED" },
-      { status: 401 }
-    );
-  }
-
-  let signed: {
-    pubkey: string;
-    signature: string;
-    nonce: string;
-    timestamp: number;
-    method: string;
-    path: string;
-    body: string;
-  };
-  try {
-    signed = JSON.parse(auth);
-  } catch {
-    return NextResponse.json(
-      { error: "AUTH_MALFORMED", code: "AUTH_MALFORMED" },
-      { status: 401 }
-    );
-  }
-
-  try {
-    await verifySignedRequest(signed, rawBody);
-  } catch (err) {
-    if (err instanceof AuthError) {
-      return NextResponse.json(
-        { error: "AUTH_REJECTED", code: err.code },
-        { status: 401 }
-      );
-    }
-    console.error("[/api/mints POST] auth verify failed");
-    return NextResponse.json(
-      { error: "AUTH_REJECTED", code: "VERIFY_FAILED" },
-      { status: 401 }
-    );
-  }
-  // --------------------------------------------------------------------
-
-  let parsed;
-  try {
-    parsed = mintSchema.parse(JSON.parse(rawBody));
-  } catch {
-    return NextResponse.json({ error: "BAD_REQUEST" }, { status: 400 });
-  }
-
-  if (!isPubkey(parsed.treeAddress) || !isPubkey(parsed.leafOwner)) {
+  if (!isPubkey(body.treeAddress) || !isPubkey(body.leafOwner)) {
     return NextResponse.json({ error: "INVALID_PUBKEY" }, { status: 400 });
   }
-  for (const c of parsed.creators) {
+  for (const c of body.creators) {
     if (!isPubkey(c.address)) {
       return NextResponse.json({ error: "INVALID_PUBKEY" }, { status: 400 });
     }
@@ -132,9 +74,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await mintCompressedNft({
-      ...parsed,
-      uri: parsed.uri ?? "",
-      metadataUri: parsed.metadataUri ?? "",
+      ...body,
+      uri: body.uri ?? "",
+      metadataUri: body.metadataUri ?? "",
     });
     return NextResponse.json({
       ok: true,
@@ -147,8 +89,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const e = err as Error;
-    console.error("[/api/mints POST]", e.message);
+    console.error("[/api/mints POST]", (err as Error).message);
     return NextResponse.json({ error: "MINT_FAILED" }, { status: 500 });
   }
 }
