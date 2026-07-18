@@ -1,10 +1,4 @@
-import type { NextRequest } from 'next/server';
-
-// Tiny in-memory token bucket. Vercel serverless functions can have multiple
-// instances, so this is best-effort — a determined attacker with enough
-// parallel requests will still drain the bucket. For a public-facing production
-// backend you should pair this with Vercel Firewall or Cloudflare rate limits.
-const buckets = new Map<string, { tokens: number; updatedAt: number }>();
+import type { NextRequest } from "next/server";
 
 interface RateLimitConfig {
   /** tokens per window */
@@ -15,16 +9,63 @@ interface RateLimitConfig {
   capacity: number;
 }
 
+interface Bucket {
+  tokens: number;
+  updatedAt: number;
+}
+
+const buckets = new Map<string, Bucket>();
+
+/**
+ * Normalise an IP address for rate-limit bucketing.
+ * - IPv4: returned as-is
+ * - IPv6: collapsed to /64 (the user-facing prefix). A rotating
+ *   attacker inside a single /64 can still abuse this, but they can't
+ *   spray 2^64 keys.
+ * - Anything else: null (caller will fall back to a shared bucket).
+ */
+function normaliseIp(ip: string | null): string | null {
+  if (!ip) return null;
+  const trimmed = ip.trim();
+  if (!trimmed) return null;
+  if (trimmed.includes(".")) {
+    // IPv4
+    const parts = trimmed.split(".");
+    if (parts.length !== 4 || parts.some((p) => !/^\d+$/.test(p))) return null;
+    return trimmed;
+  }
+  if (trimmed.includes(":")) {
+    // IPv6: keep first 4 groups (= /64)
+    const groups = trimmed.split(":").slice(0, 4).join(":");
+    return groups.toLowerCase();
+  }
+  return null;
+}
+
+/**
+ * Extract a stable client IP from a Vercel-routed request.
+ * Order:
+ *   1. x-vercel-forwarded-for (Vercel-managed; not spoofable when set)
+ *   2. x-real-ip (common upstream proxy header)
+ *   3. null (caller collapses to shared bucket)
+ *
+ * NOTE: x-forwarded-for is intentionally NOT trusted because clients
+ * can set it themselves when hitting Vercel directly.
+ */
+function getClientIp(req: NextRequest): string | null {
+  const vercel = req.headers.get("x-vercel-forwarded-for");
+  if (vercel) return normaliseIp(vercel.split(",")[0] ?? null);
+  const real = req.headers.get("x-real-ip");
+  if (real) return normaliseIp(real.split(",")[0] ?? null);
+  return null;
+}
+
 export function rateLimit(
   req: NextRequest,
-  config: RateLimitConfig
+  config: RateLimitConfig,
 ): { ok: boolean; remaining: number; retryAfterSec: number } {
-  // Use IP from common proxy headers first, then fall back to a generic key.
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
-  const key = `${ip}`;
+  const ip = getClientIp(req);
+  const key = ip ?? "__shared__";
   const now = Date.now();
 
   const bucket = buckets.get(key) ?? {
@@ -50,10 +91,6 @@ export function rateLimit(
   return { ok: true, remaining: Math.floor(bucket.tokens), retryAfterSec: 0 };
 }
 
-// Reasonable defaults for a public dApp backend:
-//   5 requests / minute, burst up to 5.
-// Anything that hits Bubblegum is expensive; if a real user is creating a
-// collection faster than once per 12s they can wait.
 export const DEFAULT_BACKEND_LIMIT: RateLimitConfig = {
   refill: 5,
   windowMs: 60_000,

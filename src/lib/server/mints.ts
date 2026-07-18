@@ -1,7 +1,7 @@
-import 'server-only';
-import { mintV1 } from '@metaplex-foundation/mpl-bubblegum';
-import { none, publicKey, some, Umi } from '@metaplex-foundation/umi';
-import { getUmi, isBackendLive, signatureToBase58 } from './umi';
+import "server-only";
+import { mintV1 } from "@metaplex-foundation/mpl-bubblegum";
+import { none, publicKey, some, Umi } from "@metaplex-foundation/umi";
+import { getUmi, isBackendLive, signatureToBase58 } from "./umi";
 
 export interface MintInput {
   treeAddress: string;
@@ -23,7 +23,7 @@ export interface MintResult {
 
 export async function mintCompressedNft(input: MintInput): Promise<MintResult> {
   if (!isBackendLive()) {
-    throw new Error('BACKEND_LIVE=false; refusing to sign real transactions');
+    throw new Error("BACKEND_LIVE=false");
   }
 
   const umi: Umi = getUmi();
@@ -47,7 +47,7 @@ export async function mintCompressedNft(input: MintInput): Promise<MintResult> {
   });
 
   const result = await builder.sendAndConfirm(umi, {
-    confirm: { commitment: 'confirmed' },
+    confirm: { commitment: "confirmed" },
   });
 
   return {

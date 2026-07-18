@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { InfoHint } from '@/components/ui/info-hint';
 import { Stepper } from '@/components/ui/stepper';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, RotateCcw, Check } from 'lucide-react';
+import { buildAuthHeader } from '@/lib/signed-request';
 
 interface TreeParams {
   maxDepth: number;
@@ -99,6 +101,7 @@ export default function CreateCollectionPage() {
   const [numNfts, setNumNfts] = useState(1000);
   const [maxDepth, setMaxDepth] = useState(14);
   const [canopyDepth, setCanopyDepth] = useState(0);
+  const wallet = useWallet();
   const [submitting, setSubmitting] = useState(false);
 
   const cost = estimateCost(maxDepth, numNfts);
@@ -139,27 +142,47 @@ export default function CreateCollectionPage() {
       toast.error('Name and symbol are required');
       return;
     }
+    if (!wallet.connected || !wallet.publicKey || !wallet.signMessage) {
+      toast.error('Connect a wallet to sign the request');
+      return;
+    }
     setSubmitting(true);
     try {
-      const res = await fetch('/api/collections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          symbol: symbol.trim(),
-          description: description.trim() || undefined,
-          image: image.trim() || undefined,
-          maxDepth,
-          maxBufferSize: FIXED_BUFFER_SIZE,
-          canopyDepth,
-        }),
+      const rawBody = JSON.stringify({
+        name: name.trim(),
+        symbol: symbol.trim(),
+        description: description.trim() || undefined,
+        image: image.trim() || undefined,
+        maxDepth,
+        maxBufferSize: FIXED_BUFFER_SIZE,
+        canopyDepth,
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data.details || data.error || `HTTP ${res.status}`);
+      const auth = await buildAuthHeader({
+        signer: {
+          publicKey: wallet.publicKey,
+          signMessage: wallet.signMessage,
+        },
+        method: 'POST',
+        path: '/api/collections',
+        rawBody,
+      });
+
+      const res = await fetch('/api/collections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth': JSON.stringify(auth),
+        },
+        body: rawBody,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.code ?? data.error ?? `HTTP ${res.status}`);
       }
 
+      const data = await res.json();
       const col = data.collection;
       toast.success('Tree created', {
         description: (

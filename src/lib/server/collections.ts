@@ -1,7 +1,7 @@
-import 'server-only';
-import { createTree } from '@metaplex-foundation/mpl-bubblegum';
-import { generateSigner } from '@metaplex-foundation/umi';
-import { getUmi, isBackendLive, signatureToBase58 } from './umi';
+import "server-only";
+import { createTree } from "@metaplex-foundation/mpl-bubblegum";
+import { generateSigner } from "@metaplex-foundation/umi";
+import { getUmi, isBackendLive, signatureToBase58 } from "./umi";
 
 export interface CreateTreeInput {
   maxDepth: number;
@@ -15,14 +15,9 @@ export interface CreateTreeResult {
   treeAuthority: string;
 }
 
-/**
- * Create a Bubblegum Merkle tree on devnet. The deployer pays for the tree
- * account rent (which dominates the cost at deeper depths) and owns the
- * tree config PDA.
- */
 export async function createMerkleTree(input: CreateTreeInput): Promise<CreateTreeResult> {
   if (!isBackendLive()) {
-    throw new Error('BACKEND_LIVE=false; refusing to sign real transactions');
+    throw new Error("BACKEND_LIVE=false");
   }
 
   const umi = getUmi();
@@ -39,12 +34,12 @@ export async function createMerkleTree(input: CreateTreeInput): Promise<CreateTr
   });
 
   const result = await builder.sendAndConfirm(umi, {
-    confirm: { commitment: 'confirmed' },
+    confirm: { commitment: "confirmed" },
   });
 
   return {
     signature: signatureToBase58(result.signature),
     treeAddress: merkleTree.publicKey.toString(),
-    treeAuthority: '',
+    treeAuthority: merkleTree.publicKey.toString(),
   };
 }

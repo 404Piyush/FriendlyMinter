@@ -1,103 +1,150 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { PublicKey } from '@solana/web3.js';
-import { createMerkleTree } from '@/lib/server/collections';
-import { isBackendLive } from '@/lib/server/umi';
-import { getDeployerPubkey } from '@/lib/server/wallet';
-import { accountUrl, explorerUrl } from '@/lib/server/umi';
-import { isValidTreeConfig, nearestValidConfig } from '@/lib/server/tree-config';
-import { rateLimit, DEFAULT_BACKEND_LIMIT } from '@/lib/server/rate-limit';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createMerkleTree } from "@/lib/server/collections";
+import { isBackendLive, accountUrl, explorerUrl } from "@/lib/server/umi";
+import { getDeployerPubkey } from "@/lib/server/wallet";
+import { isValidTreeConfig, nearestValidConfig } from "@/lib/server/tree-config";
+import { rateLimit, DEFAULT_BACKEND_LIMIT } from "@/lib/server/rate-limit";
+import { verifySignedRequest, AuthError } from "@/lib/server/auth";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const MAX_BODY_BYTES = 8 * 1024;
 
 const bodySchema = z.object({
   name: z.string().min(1).max(64),
   symbol: z.string().min(1).max(10),
   description: z.string().max(500).optional(),
   image: z.string().url().optional(),
-  maxDepth: z.number().int().min(3).max(30),
-  maxBufferSize: z.number().int().min(1).max(2048),
-  canopyDepth: z.number().int().min(0).max(20),
+  maxDepth: z.number().finite().int().min(3).max(30),
+  maxBufferSize: z.number().finite().int().min(1).max(2048),
+  canopyDepth: z.number().finite().int().min(0).max(20),
 });
 
 export async function POST(req: NextRequest) {
   if (!isBackendLive()) {
     return NextResponse.json(
-      { error: 'BACKEND_LIVE=false', code: 'BACKEND_DISABLED' },
+      { error: "BACKEND_DISABLED", code: "BACKEND_DISABLED" },
       { status: 503 }
     );
   }
 
-  // Rate-limit BEFORE doing any expensive work. The deployer wallet pays real
-  // SOL for every tree creation, so an unprotected endpoint can drain it.
   const limit = rateLimit(req, DEFAULT_BACKEND_LIMIT);
   if (!limit.ok) {
     return NextResponse.json(
-      {
-        error: 'Too many requests',
-        details: `Rate limit exceeded. Try again in ${limit.retryAfterSec}s.`,
-      },
+      { error: "RATE_LIMITED", retryAfterSec: limit.retryAfterSec },
       {
         status: 429,
         headers: {
-          'Retry-After': String(limit.retryAfterSec),
-          'X-RateLimit-Remaining': '0',
+          "Retry-After": String(limit.retryAfterSec),
+          "X-RateLimit-Remaining": "0",
         },
       }
     );
   }
 
+  // Body-size cap before we even read it.
+  const declaredLength = Number(req.headers.get("content-length") ?? "0");
+  if (declaredLength > MAX_BODY_BYTES) {
+    return NextResponse.json(
+      { error: "BODY_TOO_LARGE" },
+      { status: 413 }
+    );
+  }
+
+  const rawBody = await req.text();
+  if (rawBody.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "BODY_TOO_LARGE" }, { status: 413 });
+  }
+
+  // ---- Auth (SIWS) ---------------------------------------------------
+  const auth = req.headers.get("x-auth");
+  if (!auth) {
+    return NextResponse.json(
+      { error: "AUTH_REQUIRED", code: "AUTH_REQUIRED" },
+      { status: 401 }
+    );
+  }
+
+  let signed: {
+    pubkey: string;
+    signature: string;
+    nonce: string;
+    timestamp: number;
+    method: string;
+    path: string;
+    body: string;
+  };
+  try {
+    signed = JSON.parse(auth);
+  } catch {
+    return NextResponse.json(
+      { error: "AUTH_MALFORMED", code: "AUTH_MALFORMED" },
+      { status: 401 }
+    );
+  }
+
+  let walletPubkey: string;
+  try {
+    const pk = await verifySignedRequest(signed, rawBody);
+    walletPubkey = pk.toBase58();
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json(
+        { error: "AUTH_REJECTED", code: err.code },
+        { status: 401 }
+      );
+    }
+    console.error("[/api/collections POST] auth verify failed");
+    return NextResponse.json(
+      { error: "AUTH_REJECTED", code: "VERIFY_FAILED" },
+      { status: 401 }
+    );
+  }
+  // --------------------------------------------------------------------
+
   let parsed;
   try {
-    const json = await req.json();
-    parsed = bodySchema.parse(json);
-  } catch (err) {
-    return NextResponse.json(
-      { error: 'Invalid request body', details: (err as Error).message },
-      { status: 400 }
-    );
+    parsed = bodySchema.parse(JSON.parse(rawBody));
+  } catch {
+    return NextResponse.json({ error: "BAD_REQUEST" }, { status: 400 });
   }
 
   if (!isValidTreeConfig(parsed.maxDepth, parsed.maxBufferSize)) {
     const suggested = nearestValidConfig(parsed.maxDepth, parsed.maxBufferSize);
     return NextResponse.json(
       {
-        error: 'Invalid tree config',
-        details: `Bubblegum does not accept (maxDepth=${parsed.maxDepth}, maxBufferSize=${parsed.maxBufferSize}).`,
+        error: "INVALID_TREE_CONFIG",
         suggested,
       },
       { status: 400 }
     );
   }
 
-  // Bubblegum also requires canopy depth to be strictly less than max depth.
   if (parsed.canopyDepth >= parsed.maxDepth) {
     return NextResponse.json(
       {
-        error: 'Invalid tree config',
-        details: `canopyDepth (${parsed.canopyDepth}) must be less than maxDepth (${parsed.maxDepth}).`,
+        error: "INVALID_TREE_CONFIG",
         suggested: { ...parsed, canopyDepth: Math.max(0, parsed.maxDepth - 1) },
       },
       { status: 400 }
     );
   }
 
-  // If the user provided an image URL, restrict to https:// to prevent
-  // javascript:/data:/file: schemes being smuggled into metadata later.
   if (parsed.image) {
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(parsed.image);
     } catch {
       return NextResponse.json(
-        { error: 'Invalid image URL', details: 'Image URL must be a valid absolute URL.' },
+        { error: "INVALID_IMAGE_URL" },
         { status: 400 }
       );
     }
-    if (parsedUrl.protocol !== 'https:') {
+    if (parsedUrl.protocol !== "https:") {
       return NextResponse.json(
-        { error: 'Invalid image URL', details: 'Image URL must use https://' },
+        { error: "INVALID_IMAGE_URL" },
         { status: 400 }
       );
     }
@@ -115,11 +162,12 @@ export async function POST(req: NextRequest) {
       collection: {
         name: parsed.name,
         symbol: parsed.symbol,
-        description: parsed.description ?? '',
-        image: parsed.image ?? '',
+        description: parsed.description ?? "",
+        image: parsed.image ?? "",
         treeAddress: result.treeAddress,
         treeAuthority: result.treeAuthority,
         creator: getDeployerPubkey(),
+        creatorSigner: walletPubkey,
         maxDepth: parsed.maxDepth,
         maxBufferSize: parsed.maxBufferSize,
         canopyDepth: parsed.canopyDepth,
@@ -130,14 +178,10 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const e = err as Error & { cause?: unknown };
-    console.error('[/api/collections POST]', e.message, e.cause);
-    // Don't leak stack traces or library internals in the response body.
+    const e = err as Error;
+    console.error("[/api/collections POST]", e.message);
     return NextResponse.json(
-      {
-        error: 'Failed to create Merkle tree',
-        details: process.env.NODE_ENV === 'development' ? e.message : 'Internal error',
-      },
+      { error: "TREE_CREATE_FAILED" },
       { status: 500 }
     );
   }
