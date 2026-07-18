@@ -64,12 +64,12 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="group flex items-center gap-2.5">
-          <div className="relative flex size-9 items-center justify-center bg-sol-gradient text-primary-foreground shadow-[0_0_0_1px_rgba(153,69,255,0.4),0_4px_18px_-4px_rgba(153,69,255,0.5)] transition-transform duration-200 group-hover:scale-105">
+        <Link href="/" className="group flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center text-sol-green transition-opacity group-hover:opacity-80">
             <SolMark size={18} />
           </div>
-          <span className="text-base font-semibold tracking-tight">
-            Friendly<span className="text-sol-gradient">Minter</span>
+          <span className="text-sm font-semibold tracking-tight text-foreground">
+            FriendlyMinter
           </span>
         </Link>
 
@@ -105,12 +105,12 @@ export const Header: React.FC = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] border-l border-border bg-background p-0">
               <div className="border-b border-border p-5">
-                <div className="flex items-center gap-2.5">
-                  <div className="relative flex size-9 items-center justify-center bg-sol-gradient text-primary-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 items-center justify-center text-sol-green">
                     <SolMark size={18} />
                   </div>
-                  <span className="text-base font-semibold tracking-tight">
-                    Friendly<span className="text-sol-gradient">Minter</span>
+                  <span className="text-sm font-semibold tracking-tight text-foreground">
+                    FriendlyMinter
                   </span>
                 </div>
               </div>

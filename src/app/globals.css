@@ -89,10 +89,6 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-inter), system-ui, sans-serif;
     font-feature-settings: "ss01", "cv11";
-    background-image:
-      radial-gradient(at 20% 0%, rgba(153, 69, 255, 0.06) 0%, transparent 40%),
-      radial-gradient(at 80% 30%, rgba(20, 241, 149, 0.04) 0%, transparent 50%);
-    background-attachment: fixed;
   }
 
   h1, h2, h3, h4 {
@@ -126,7 +122,7 @@
     cursor: not-allowed !important;
   }
 
-  /* ---- Kill the ugly native number spinners (Chrome, Safari, Firefox, Edge) ---- */
+  /* Kill native number spinners */
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -151,193 +147,12 @@
     animation: livePulse 1.6s ease-in-out infinite;
   }
 
-  /* Subtle sweep for active nav underline on initial render */
-  @keyframes underlineSweep {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
-  }
-
-  /* ---- Page enter / stagger --------------------------------------------- */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .anim-fade-up {
-    opacity: 0;
-    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  .anim-stagger-0 { animation-delay: 0ms; }
-  .anim-stagger-1 { animation-delay: 80ms; }
-  .anim-stagger-2 { animation-delay: 160ms; }
-  .anim-stagger-3 { animation-delay: 240ms; }
-  .anim-stagger-4 { animation-delay: 320ms; }
-  .anim-stagger-5 { animation-delay: 400ms; }
-
-  /* ---- USP callout: slow shimmer across the block ----------------------- */
-  @keyframes uspShimmer {
-    0% { transform: translateX(-110%); }
-    100% { transform: translateX(110%); }
-  }
-  .anim-shimmer-bar {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .anim-shimmer-bar::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      110deg,
-      transparent 0%,
-      transparent 35%,
-      rgba(255, 255, 255, 0.18) 50%,
-      transparent 65%,
-      transparent 100%
-    );
-    animation: uspShimmer 4.5s ease-in-out infinite;
-  }
-
-  /* ---- USP savings number pulse ----------------------------------------- */
-  @keyframes savingsPulse {
-    0%, 100% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.015); filter: brightness(1.08); }
-  }
-  .anim-savings {
-    animation: savingsPulse 2.4s ease-in-out infinite;
-    transform-origin: left center;
-  }
-
-  /* ---- Sparkle rotation ------------------------------------------------ */
-  @keyframes sparkleSpin {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.15); }
-  }
-  .anim-sparkle {
-    animation: sparkleSpin 3s ease-in-out infinite;
-    transform-origin: center;
-  }
-
-  /* ---- Number-change flash (when useCountUp lands) --------------------- */
-  @keyframes numberFlash {
-    0% { color: var(--primary); text-shadow: 0 0 0 transparent; }
-    100% { color: var(--foreground); text-shadow: none; }
-  }
-  .anim-number-flash {
-    animation: numberFlash 0.6s ease-out;
-  }
-
-  /* ---- Bar fill grow --------------------------------------------------- */
-  @keyframes barGrow {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
-  }
-  .anim-bar-grow {
-    transform-origin: left center;
-    animation: barGrow 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  /* ---- Input focus glow ------------------------------------------------ */
-  @keyframes focusGlow {
-    0%, 100% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(20, 241, 149, 0); }
-    50% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(20, 241, 149, 0.2); }
-  }
-  input:focus-visible,
-  textarea:focus-visible {
-    animation: focusGlow 1.6s ease-in-out infinite;
-    border-color: var(--ring);
-    outline: none;
-  }
-
-  /* ---- CTA glow pulse -------------------------------------------------- */
-  @keyframes ctaGlow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(20, 241, 149, 0); }
-    50% { box-shadow: 0 0 0 6px rgba(20, 241, 149, 0.22); }
-  }
-  .anim-cta {
-    position: relative;
-    overflow: hidden;
-  }
-  .anim-cta::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-    pointer-events: none;
-    box-shadow: 0 0 0 0 rgba(20, 241, 149, 0);
-    animation: ctaGlow 2.6s ease-in-out infinite;
-  }
-
-  /* ---- Solana gradient utilities -------------------------------------- */
-  .bg-sol-gradient {
-    background-image: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
-  }
-  .bg-sol-gradient-horizontal {
-    background-image: linear-gradient(90deg, #9945ff 0%, #14f195 100%);
-  }
-  .bg-sol-gradient-soft {
-    background-image: linear-gradient(135deg, rgba(153, 69, 255, 0.15) 0%, rgba(20, 241, 149, 0.15) 100%);
-  }
-  .text-sol-gradient {
-    background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-  }
-  .border-sol-gradient {
-    border-image: linear-gradient(135deg, #9945ff 0%, #14f195 100%) 1;
-  }
-
-  /* Moving gradient sweep across an element */
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .anim-gradient-shift {
-    background-size: 200% 200%;
-    animation: gradientShift 6s ease-in-out infinite;
-  }
-
-  /* ---- Preset chip hover scale ----------------------------------------- */
-  .anim-preset {
-    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
-  }
-  .anim-preset:hover {
-    transform: translateY(-1px);
-  }
-  .anim-preset:active {
-    transform: translateY(0);
-  }
-
-  /* ---- Section reveal divider pulse ----------------------------------- */
-  @keyframes dividerPulse {
-    0%, 100% { opacity: 0.4; transform: scaleX(0.6); }
-    50% { opacity: 1; transform: scaleX(1); }
-  }
-  .anim-divider {
-    transform-origin: left center;
-    animation: dividerPulse 4s ease-in-out infinite;
-  }
-
-  /* ---- Respect reduced motion ---------------------------------------- */
-  @media (prefers-reduced-motion: reduce) {
-    .anim-fade-up,
-    .anim-shimmer-bar::before,
-    .anim-savings,
-    .anim-sparkle,
-    .anim-number-flash,
-    .anim-bar-grow,
-    input:focus-visible,
-    .anim-cta::after,
-    .anim-divider,
-    .anim-preset {
-      animation: none !important;
-      transform: none !important;
-    }
-  }
+  /* Solana palette — single accent green. No gradients. */
+  .bg-sol-green { background-color: var(--sol-green); }
+  .bg-sol-purple { background-color: var(--sol-purple); }
+  .text-sol-green { color: var(--sol-green); }
+  .text-sol-purple { color: var(--sol-purple); }
+  .border-sol-green { border-color: var(--sol-green); }
 }
 
 /* ---------------------------------------------------------------------------
@@ -472,7 +287,7 @@ body {
 
 /* The trigger button uses the same class hierarchy as our Button component */
 .wallet-adapter-button.wallet-adapter-button-trigger {
-  background: linear-gradient(90deg, #9945ff 0%, #14f195 100%) !important;
+  background: var(--sol-green) !important;
   color: #08080a !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -484,11 +299,11 @@ body {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.5rem !important;
-  transition: opacity 0.18s ease !important;
+  transition: background-color 0.15s ease !important;
   cursor: pointer !important;
 }
 .wallet-adapter-button.wallet-adapter-button-trigger:hover {
-  opacity: 0.9 !important;
+  background: color-mix(in oklab, var(--sol-green) 85%, black) !important;
 }
 .wallet-adapter-button-trigger-icon {
   filter: invert(1) !important; /* make the default chevron dark on lime */
