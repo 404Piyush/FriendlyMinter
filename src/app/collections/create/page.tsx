@@ -243,9 +243,9 @@ export default function CreateCollectionPage() {
   return (
     <div>
       <Header />
-      <main className="container mx-auto max-w-2xl px-6 py-16">
+      <main className="container mx-auto max-w-2xl px-6 py-6">
         {/* Top bar: back link + stepper */}
-        <div className="mb-10 flex items-center justify-between gap-4">
+        <div className="mb-6 flex items-center justify-between gap-4">
           <Link
             href="/collections"
             className="inline-flex size-11 items-center justify-center rounded-xl bg-background text-foreground shadow-[-3px_-3px_6px_rgba(255,255,255,0.9),3px_3px_6px_rgba(150,130,100,0.28)] transition-shadow active:shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]"
@@ -264,7 +264,7 @@ export default function CreateCollectionPage() {
         </div>
 
         {/* Headline — minimal */}
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-semibold tracking-tight">
           {step === 0 && 'Name your collection'}
           {step === 1 && 'Pick a tree size'}
           {step === 2 && 'How many items?'}
@@ -272,7 +272,7 @@ export default function CreateCollectionPage() {
         </h1>
 
         {/* Step content */}
-        <div className="mt-10">
+        <div className="mt-6">
           {step === 0 && (
             <div className="space-y-7">
               <Field
@@ -520,7 +520,7 @@ Clicking a preset auto-fills the depth, canopy, and a suggested item count below
         </div>
 
         {/* Navigation */}
-        <div className="mt-10 flex items-center justify-between">
+        <div className="mt-8 flex items-center justify-between">
           <Button variant="neu" onClick={back} disabled={step === 0 || submitting}>
             <ArrowLeft className="size-4" />
           </Button>
