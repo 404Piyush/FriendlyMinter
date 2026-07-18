@@ -31,7 +31,7 @@ export const WalletProvider: FC<WalletProviderProps> = ({ children }) => {
   // Configure supported wallets
   const wallets = useMemo(
     () => [
-      new PhantomWalletAdapter(),
+      new PhantomWalletAdapter({ network }),
       new SolflareWalletAdapter({ network }),
       new TorusWalletAdapter(),
       new LedgerWalletAdapter(),
