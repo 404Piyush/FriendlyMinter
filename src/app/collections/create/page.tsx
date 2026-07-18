@@ -231,26 +231,6 @@ export default function CreateCollectionPage() {
           {step === 3 && 'Review & create'}
         </h1>
 
-        {/* Live cost display — single big number, neumorphic */}
-        <div className="mt-8 rounded-2xl bg-background px-6 py-5 shadow-[inset_4px_4px_8px_rgba(150,130,100,0.28),inset_-4px_-4px_8px_rgba(255,255,255,0.9)]">
-          <div className="flex items-baseline justify-between gap-4">
-            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Total cost</span>
-            <span className="font-mono text-4xl font-medium tabular-nums tracking-tight">
-              {fmt(aTotal)}
-              <span className="ml-1 text-base text-muted-foreground">SOL</span>
-            </span>
-          </div>
-          <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
-            <span>rent <span className="text-foreground tabular-nums">{fmt(aRent)}</span></span>
-            <span>·</span>
-            <span>{numNfts.toLocaleString()} mints <span className="text-foreground tabular-nums">{fmt(aMint)}</span></span>
-            <span>·</span>
-            <span>compression <span className="text-foreground tabular-nums">{fmt(aComp)}</span></span>
-            <span>·</span>
-            <span>saves <span className="text-sol-green">{Math.max(0, savingsPct).toFixed(1)}%</span></span>
-          </div>
-        </div>
-
         {/* Step content */}
         <div className="mt-10">
           {step === 0 && (
