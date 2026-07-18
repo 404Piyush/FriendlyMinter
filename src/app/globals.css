@@ -7,7 +7,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-inter);
+  --font-serif: var(--font-serif);
   --font-mono: var(--font-jbmono);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -29,51 +29,51 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 :root {
-  --background: #08080a;
-  --foreground: #ededed;
-  --card: #0f0f12;
-  --card-foreground: #ededed;
-  --popover: #0f0f12;
-  --popover-foreground: #ededed;
+  /* Editorial Solana — cream paper, dark ink, Solana green accent */
+  --background: #f8f5ee;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
 
   /* Solana palette */
   --sol-purple: #9945ff;
   --sol-green: #14f195;
   --sol-cyan: #00d4ff;
-  --sol-magenta: #ff4ecd;
-  --sol-gradient: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
-  --sol-gradient-soft: linear-gradient(135deg, rgba(153, 69, 255, 0.18) 0%, rgba(20, 241, 149, 0.18) 100%);
-  --sol-gradient-horizontal: linear-gradient(90deg, #9945ff 0%, #14f195 100%);
 
-  /* Primary maps to Solana green — high-contrast on black */
+  /* Primary = Solana green (CTA, links) */
   --primary: #14f195;
-  --primary-foreground: #08080a;
+  --primary-foreground: #0a0a0a;
 
-  /* Secondary maps to Solana purple */
-  --secondary: #1a1320;
-  --secondary-foreground: #ededed;
+  /* Secondary = warm cream tint for subtle differentiation */
+  --secondary: #f0ebdc;
+  --secondary-foreground: #1a1a1a;
 
-  --muted: #14141a;
-  --muted-foreground: #7c7c8a;
+  /* Muted = warm beige */
+  --muted: #ede9dc;
+  --muted-foreground: #6e6a5e;
 
+  /* Accent = Solana purple */
   --accent: #9945ff;
-  --accent-foreground: #ededed;
+  --accent-foreground: #ffffff;
 
-  --destructive: #ff5c7a;
-  --destructive-foreground: #0a0a09;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
   --success: #14f195;
-  --success-foreground: #08080a;
+  --success-foreground: #0a0a0a;
 
-  --border: #1f1f26;
-  --input: #16161c;
+  /* Warm light borders + inputs */
+  --border: #e5dfd0;
+  --input: #ffffff;
   --ring: #14f195;
 }
 
@@ -91,15 +91,21 @@
     font-feature-settings: "ss01", "cv11";
   }
 
-  h1, h2, h3, h4 {
+  h1, h2, h3 {
+    font-family: var(--font-serif), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    color: var(--foreground);
+  }
+  h4, h5, h6 {
     font-family: var(--font-inter), system-ui, sans-serif;
-    letter-spacing: -0.02em;
     font-weight: 600;
+    letter-spacing: -0.015em;
   }
 
   ::selection {
     background: var(--sol-green);
-    color: #08080a;
+    color: #0a0a0a;
   }
 
   /* Better default focus ring */
@@ -160,19 +166,18 @@
    --------------------------------------------------------------------------- */
 
 * {
-  /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.25s ease;
 }
 
 *:hover {
-  scrollbar-color: #3a3a36 transparent;
+  scrollbar-color: #cdc8b8 transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
@@ -180,21 +185,13 @@
 *::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 0;
-  transition: background 0.25s ease, width 0.25s ease, height 0.25s ease;
+  transition: background 0.2s ease;
 }
 *:hover::-webkit-scrollbar-thumb {
-  background: #3a3a36;
+  background: #cdc8b8;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--sol-green);
-}
-/* Firefox animates the thumb on hover via scrollbar-color above */
-*:hover::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-*::-webkit-scrollbar-thumb:active {
-  background: var(--sol-green);
+  background: #14f195;
 }
 
 /* Auto-show scrollbars only on scroll. Hide idle ones. */
@@ -213,36 +210,39 @@ body {
    --------------------------------------------------------------------------- */
 
 .wallet-adapter-modal-wrapper {
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(6px);
+  background: rgba(20, 20, 18, 0.5) !important;
+  backdrop-filter: blur(4px);
 }
 
 .wallet-adapter-modal {
-  background: #111110 !important;
-  border: 1px solid #262624 !important;
-  border-radius: 0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e5dfd0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 24px 60px -16px rgba(20, 20, 18, 0.25) !important;
   font-family: var(--font-inter), system-ui, sans-serif !important;
+  color: #1a1a1a !important;
 }
 
 .wallet-adapter-modal-title {
-  color: #ededed !important;
-  font-weight: 600 !important;
-  letter-spacing: -0.01em !important;
-  font-size: 1.125rem !important;
-  border-bottom: 1px solid #262624 !important;
-  padding: 1rem 1.5rem !important;
+  color: #1a1a1a !important;
+  font-family: var(--font-serif), Georgia, serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.02em !important;
+  font-size: 1.25rem !important;
+  border-bottom: 1px solid #e5dfd0 !important;
+  padding: 1.25rem 1.5rem !important;
 }
 
 .wallet-adapter-modal-list {
   padding: 0.75rem !important;
-  gap: 2px !important;
+  gap: 4px !important;
   background: transparent !important;
 }
 
 .wallet-adapter-modal-list-header,
 .wallet-adapter-modal-list-more {
-  color: #757570 !important;
-  font-size: 0.75rem !important;
+  color: #6e6a5e !important;
+  font-size: 0.7rem !important;
   font-family: var(--font-jbmono), ui-monospace, monospace !important;
   text-transform: uppercase !important;
   letter-spacing: 0.18em !important;
@@ -253,19 +253,19 @@ body {
 .wallet-adapter-modal-list-item {
   background: transparent !important;
   border: 1px solid transparent !important;
-  color: #ededed !important;
+  color: #1a1a1a !important;
   font-family: var(--font-inter), system-ui, sans-serif !important;
   font-size: 0.875rem !important;
   padding: 0.75rem 1rem !important;
-  border-radius: 0 !important;
+  border-radius: 8px !important;
   height: auto !important;
-  transition: background-color 0.18s ease, border-color 0.18s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
 }
 
 .wallet-adapter-modal-list .wallet-adapter-button:hover,
 .wallet-adapter-modal-list-item:hover {
-  background: #1c1c1a !important;
-  border-color: #262624 !important;
+  background: #f0ebdc !important;
+  border-color: #e5dfd0 !important;
 }
 
 .wallet-adapter-modal-list .wallet-adapter-button-start-icon,
@@ -276,21 +276,20 @@ body {
 
 .wallet-adapter-modal-button-close {
   background: transparent !important;
-  color: #757570 !important;
-  border-radius: 0 !important;
+  color: #6e6a5e !important;
+  border-radius: 8px !important;
   transition: color 0.15s ease, background 0.15s ease !important;
 }
 .wallet-adapter-modal-button-close:hover {
-  color: #ededed !important;
-  background: #1c1c1a !important;
+  color: #1a1a1a !important;
+  background: #f0ebdc !important;
 }
 
-/* The trigger button uses the same class hierarchy as our Button component */
 .wallet-adapter-button.wallet-adapter-button-trigger {
   background: var(--sol-green) !important;
-  color: #08080a !important;
+  color: #0a0a0a !important;
   border: 0 !important;
-  border-radius: 0 !important;
+  border-radius: 8px !important;
   font-family: var(--font-inter), system-ui, sans-serif !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
@@ -303,10 +302,7 @@ body {
   cursor: pointer !important;
 }
 .wallet-adapter-button.wallet-adapter-button-trigger:hover {
-  background: color-mix(in oklab, var(--sol-green) 85%, black) !important;
-}
-.wallet-adapter-button-trigger-icon {
-  filter: invert(1) !important; /* make the default chevron dark on lime */
+  background: color-mix(in oklab, var(--sol-green) 88%, black) !important;
 }
 
 /* Hide the "more options" chevron arrow on list items, they look stock */

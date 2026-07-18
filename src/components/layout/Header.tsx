@@ -52,8 +52,6 @@ function NavLink({ href, name, isActive }: { href: string; name: string; isActiv
 const navItems = [
   { name: "Dashboard", href: "/" },
   { name: "Collections", href: "/collections" },
-  { name: "New collection", href: "/collections/create" },
-  { name: "Jobs", href: "/jobs" },
   { name: "Demo", href: "/demo" },
   { name: "Docs", href: "/docs" },
 ];
@@ -62,14 +60,14 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="group flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center text-sol-green transition-opacity group-hover:opacity-80">
-            <SolMark size={18} />
+        <Link href="/" className="group flex items-center gap-2.5">
+          <div className="flex size-8 items-center justify-center text-foreground transition-opacity group-hover:opacity-70">
+            <SolMark size={20} />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-foreground">
-            FriendlyMinter
+          <span className="font-serif text-lg leading-none tracking-tight text-foreground">
+            Friendly<span className="text-foreground">Minter</span>
           </span>
         </Link>
 

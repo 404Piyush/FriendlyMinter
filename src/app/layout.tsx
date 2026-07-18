@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Inter_Tight, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -8,6 +8,14 @@ const inter = Inter_Tight({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400"],
+  style: ["normal", "italic"],
 });
 
 const jbMono = JetBrains_Mono({
@@ -19,7 +27,7 @@ const jbMono = JetBrains_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0a09",
+  themeColor: "#f8f5ee",
 };
 
 export const metadata: Metadata = {
@@ -68,7 +76,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jbMono.variable}`}
+      className={`${inter.variable} ${instrumentSerif.variable} ${jbMono.variable}`}
     >
       <body>
         <WalletProvider>
