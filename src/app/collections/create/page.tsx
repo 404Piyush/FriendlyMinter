@@ -155,17 +155,20 @@ export default function CreateCollectionPage() {
       <main className="container mx-auto max-w-5xl px-6 py-16">
         <Link
           href="/collections"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          className="anim-fade-up anim-stagger-0 mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="size-3.5" />
+          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
           Collections
         </Link>
 
-        <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
+        <h1 className="anim-fade-up anim-stagger-1 text-4xl font-semibold tracking-tight md:text-5xl">
           New collection
         </h1>
+        <p className="anim-fade-up anim-stagger-2 mt-3 text-sm text-muted-foreground">
+          Configure the on-chain Merkle tree. The deployer wallet signs and pays the rent.
+        </p>
 
-        <form onSubmit={handleSubmit} className="mt-12 grid gap-16 lg:grid-cols-[1fr_320px]">
+        <form onSubmit={handleSubmit} className="anim-fade-up anim-stagger-3 mt-12 grid gap-16 lg:grid-cols-[1fr_320px]">
           <div className="space-y-12">
             {/* Metadata */}
             <div>
@@ -266,9 +269,9 @@ export default function CreateCollectionPage() {
                       key={p.label}
                       type="button"
                       onClick={() => setParams(p.params)}
-                      className={`group cursor-pointer border px-3 py-1.5 text-sm transition-all duration-150 ${
+                      className={`group anim-preset cursor-pointer border px-3 py-1.5 text-sm ${
                         active
-                          ? 'border-primary bg-primary text-primary-foreground'
+                          ? 'border-primary bg-primary text-primary-foreground shadow-[0_0_0_3px_rgba(211,255,72,0.15)]'
                           : 'border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground'
                       }`}
                     >
@@ -302,19 +305,20 @@ export default function CreateCollectionPage() {
           {/* Cost summary — animated, USP-forward */}
           <aside className="space-y-8 lg:sticky lg:top-24 lg:self-start">
             {/* USP — animated savings callout */}
-            <div className="relative overflow-hidden border border-primary/40 bg-primary p-6 text-primary-foreground">
+            <div className="relative overflow-hidden border border-primary/40 bg-primary p-6 text-primary-foreground anim-fade-up anim-stagger-3">
+              <div className="anim-shimmer-bar" />
               <div className="absolute inset-0 -z-0 opacity-30">
                 <div className="absolute -right-6 -top-6 size-32 rounded-full bg-primary-foreground/20 blur-2xl" />
                 <div className="absolute -left-6 -bottom-6 size-32 rounded-full bg-primary-foreground/10 blur-2xl" />
               </div>
               <div className="relative">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="size-4 animate-pulse" />
+                  <Sparkles className="size-4 anim-sparkle" />
                   <span className="text-xs font-medium uppercase tracking-[0.18em]">
                     You save
                   </span>
                 </div>
-                <div className="mt-3 text-5xl font-semibold tracking-tighter tabular-nums">
+                <div className="anim-savings mt-3 text-6xl font-semibold tracking-tighter tabular-nums">
                   {Math.max(0, animatedSavings).toFixed(1)}
                   <span className="ml-1 text-2xl">%</span>
                 </div>
@@ -328,8 +332,8 @@ export default function CreateCollectionPage() {
                     <span className="w-12 shrink-0 text-primary-foreground/70">Legacy</span>
                     <div className="relative h-2 flex-1 bg-primary-foreground/20">
                       <div
-                        className="absolute inset-y-0 left-0 bg-primary-foreground"
-                        style={{ width: '100%' }}
+                        className="absolute inset-y-0 left-0 right-0 bg-primary-foreground anim-bar-grow"
+                        style={{ animationDuration: '0.4s' }}
                       />
                     </div>
                     <span className="w-16 shrink-0 text-right font-mono tabular-nums text-primary-foreground/90">
@@ -340,8 +344,11 @@ export default function CreateCollectionPage() {
                     <span className="w-12 shrink-0 text-primary-foreground/70">You</span>
                     <div className="relative h-2 flex-1 bg-primary-foreground/20">
                       <div
-                        className="absolute inset-y-0 left-0 bg-primary-foreground transition-[width] duration-300 ease-out"
-                        style={{ width: `${Math.max(2, (cost.total / Math.max(legacyCost, 0.0001)) * 100)}%` }}
+                        className="absolute inset-y-0 left-0 bg-primary-foreground anim-bar-grow"
+                        style={{
+                          width: `${Math.max(2, (cost.total / Math.max(legacyCost, 0.0001)) * 100)}%`,
+                          animationDuration: '0.5s',
+                        }}
                       />
                     </div>
                     <span className="w-16 shrink-0 text-right font-mono tabular-nums text-primary-foreground">
@@ -353,9 +360,12 @@ export default function CreateCollectionPage() {
             </div>
 
             {/* Total cost */}
-            <div>
+            <div className="anim-fade-up anim-stagger-4">
               <p className="text-sm text-muted-foreground">Estimated cost</p>
-              <p className="mt-2 text-5xl font-semibold tracking-tight text-foreground tabular-nums">
+              <p
+                key={animatedTotal.toFixed(4)}
+                className="mt-2 text-5xl font-semibold tracking-tight text-foreground tabular-nums anim-number-flash"
+              >
                 {animatedTotal.toFixed(4)}
                 <span className="ml-2 text-base font-normal text-muted-foreground">SOL</span>
               </p>
@@ -363,23 +373,26 @@ export default function CreateCollectionPage() {
             </div>
 
             {/* Cost composition bar */}
-            <div>
+            <div className="anim-fade-up anim-stagger-5">
               <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Cost composition</p>
               <div
                 className="mt-2 flex h-1.5 w-full overflow-hidden bg-border"
                 title="Tree rent · Mints · Compression"
               >
                 <div
-                  className="h-full bg-primary transition-[width] duration-300 ease-out"
-                  style={{ width: `${rentPct}%` }}
+                  key={`rent-${rentPct.toFixed(0)}`}
+                  className="h-full bg-primary anim-bar-grow"
+                  style={{ width: `${rentPct}%`, animationDuration: '0.4s' }}
                 />
                 <div
-                  className="h-full bg-foreground/60 transition-[width] duration-300 ease-out"
-                  style={{ width: `${mintPct}%` }}
+                  key={`mint-${mintPct.toFixed(0)}`}
+                  className="h-full bg-foreground/60 anim-bar-grow"
+                  style={{ width: `${mintPct}%`, animationDuration: '0.5s', animationDelay: '60ms' }}
                 />
                 <div
-                  className="h-full bg-muted-foreground transition-[width] duration-300 ease-out"
-                  style={{ width: `${compPct}%` }}
+                  key={`comp-${compPct.toFixed(0)}`}
+                  className="h-full bg-muted-foreground anim-bar-grow"
+                  style={{ width: `${compPct}%`, animationDuration: '0.6s', animationDelay: '120ms' }}
                 />
               </div>
               <div className="mt-3 space-y-1.5 text-sm">
@@ -395,12 +408,27 @@ export default function CreateCollectionPage() {
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={submitting}>
-              <Zap className="size-4" />
-              {submitting ? 'Submitting…' : 'Create collection'}
+            <Button
+              type="submit"
+              size="lg"
+              className="anim-cta w-full"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  Submitting…
+                </>
+              ) : (
+                <>
+                  <Zap className="size-4 transition-transform group-hover:scale-110" />
+                  Create collection
+                </>
+              )}
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              Demo mode — values are not persisted.
+            <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
+              <span className="size-1.5 animate-pulse rounded-full bg-success" />
+              Signs with the live deployer wallet · on Solana devnet
             </p>
           </aside>
         </form>

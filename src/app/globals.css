@@ -130,6 +130,156 @@
     from { transform: scaleX(0); }
     to { transform: scaleX(1); }
   }
+
+  /* ---- Page enter / stagger --------------------------------------------- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .anim-fade-up {
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .anim-stagger-0 { animation-delay: 0ms; }
+  .anim-stagger-1 { animation-delay: 80ms; }
+  .anim-stagger-2 { animation-delay: 160ms; }
+  .anim-stagger-3 { animation-delay: 240ms; }
+  .anim-stagger-4 { animation-delay: 320ms; }
+  .anim-stagger-5 { animation-delay: 400ms; }
+
+  /* ---- USP callout: slow shimmer across the block ----------------------- */
+  @keyframes uspShimmer {
+    0% { transform: translateX(-110%); }
+    100% { transform: translateX(110%); }
+  }
+  .anim-shimmer-bar {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .anim-shimmer-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 65%,
+      transparent 100%
+    );
+    animation: uspShimmer 4.5s ease-in-out infinite;
+  }
+
+  /* ---- USP savings number pulse ----------------------------------------- */
+  @keyframes savingsPulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.015); filter: brightness(1.08); }
+  }
+  .anim-savings {
+    animation: savingsPulse 2.4s ease-in-out infinite;
+    transform-origin: left center;
+  }
+
+  /* ---- Sparkle rotation ------------------------------------------------ */
+  @keyframes sparkleSpin {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.15); }
+  }
+  .anim-sparkle {
+    animation: sparkleSpin 3s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  /* ---- Number-change flash (when useCountUp lands) --------------------- */
+  @keyframes numberFlash {
+    0% { color: var(--primary); text-shadow: 0 0 0 transparent; }
+    100% { color: var(--foreground); text-shadow: none; }
+  }
+  .anim-number-flash {
+    animation: numberFlash 0.6s ease-out;
+  }
+
+  /* ---- Bar fill grow --------------------------------------------------- */
+  @keyframes barGrow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .anim-bar-grow {
+    transform-origin: left center;
+    animation: barGrow 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* ---- Input focus glow ------------------------------------------------ */
+  @keyframes focusGlow {
+    0%, 100% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(211, 255, 72, 0); }
+    50% { box-shadow: 0 0 0 1px var(--ring), 0 0 0 4px rgba(211, 255, 72, 0.18); }
+  }
+  input:focus-visible,
+  textarea:focus-visible {
+    animation: focusGlow 1.6s ease-in-out infinite;
+    border-color: var(--ring);
+    outline: none;
+  }
+
+  /* ---- CTA glow pulse -------------------------------------------------- */
+  @keyframes ctaGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(211, 255, 72, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(211, 255, 72, 0.18); }
+  }
+  .anim-cta {
+    position: relative;
+    overflow: hidden;
+  }
+  .anim-cta::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: 0 0 0 0 rgba(211, 255, 72, 0);
+    animation: ctaGlow 2.6s ease-in-out infinite;
+  }
+
+  /* ---- Preset chip hover scale ----------------------------------------- */
+  .anim-preset {
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+  }
+  .anim-preset:hover {
+    transform: translateY(-1px);
+  }
+  .anim-preset:active {
+    transform: translateY(0);
+  }
+
+  /* ---- Section reveal divider pulse ----------------------------------- */
+  @keyframes dividerPulse {
+    0%, 100% { opacity: 0.4; transform: scaleX(0.6); }
+    50% { opacity: 1; transform: scaleX(1); }
+  }
+  .anim-divider {
+    transform-origin: left center;
+    animation: dividerPulse 4s ease-in-out infinite;
+  }
+
+  /* ---- Respect reduced motion ---------------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    .anim-fade-up,
+    .anim-shimmer-bar::before,
+    .anim-savings,
+    .anim-sparkle,
+    .anim-number-flash,
+    .anim-bar-grow,
+    input:focus-visible,
+    .anim-cta::after,
+    .anim-divider,
+    .anim-preset {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
 }
 
 /* ---------------------------------------------------------------------------
