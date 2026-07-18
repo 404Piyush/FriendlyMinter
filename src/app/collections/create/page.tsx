@@ -234,106 +234,174 @@ export default function CreateCollectionPage() {
         {/* Step content */}
         <div className="mt-10">
           {step === 0 && (
-            <div className="space-y-5">
-              <div className="grid gap-5 sm:grid-cols-3">
-                <div className="sm:col-span-2">
-                  <Input
-                    placeholder="Collection name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    maxLength={64}
-                    autoFocus
-                  />
-                </div>
+            <div className="space-y-7">
+              <Field
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Name
+                    <InfoHint text="The full name of your collection. Shown in wallets, marketplaces, and the Solana explorer. Max 64 characters." />
+                  </span>
+                }
+              >
                 <Input
-                  placeholder="Symbol"
+                  placeholder="e.g. Solana Genesis Pixels"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={64}
+                  autoFocus
+                />
+              </Field>
+              <Field
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Symbol
+                    <InfoHint text="A short ticker for your collection (think stock symbol). Shown next to every item in this collection. Max 10 characters, UPPERCASE." />
+                  </span>
+                }
+              >
+                <Input
+                  placeholder="e.g. GPX"
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                   maxLength={10}
                   className="font-mono"
                 />
-              </div>
-              <Textarea
-                placeholder="Description (optional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[80px] rounded-xl bg-background px-4 py-2 text-base shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] outline-none transition-shadow duration-150 placeholder:text-ink-faint focus:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.32),inset_-3px_-3px_6px_rgba(255,255,255,1)]"
-              />
-              <Input
-                placeholder="Cover image URL (optional)"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-              />
+              </Field>
+              <Field
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Description
+                    <InfoHint text="Optional. A short pitch for your collection. Shown in marketplaces." />
+                  </span>
+                }
+              >
+                <Textarea
+                  placeholder="A pixel-art series of 1,000 generative collectibles on Solana."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="min-h-[80px] rounded-xl bg-background px-4 py-2 text-base shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] outline-none transition-shadow duration-150 placeholder:text-ink-faint focus:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.32),inset_-3px_-3px_6px_rgba(255,255,255,1)]"
+                />
+              </Field>
+              <Field
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Cover image
+                    <InfoHint text="HTTPS link to a PNG or JPG. Shown as the collection thumbnail on marketplaces. Stored permanently on-chain as part of the metadata." />
+                  </span>
+                }
+              >
+                <Input
+                  placeholder="https://example.com/cover.png"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                />
+              </Field>
             </div>
           )}
 
           {step === 1 && (
-            <div className="space-y-6">
-              <div className="grid gap-3 sm:grid-cols-4">
-                {PRESETS.map((p) => {
-                  const active =
-                    maxDepth === p.params.maxDepth && canopyDepth === p.params.canopyDepth;
-                  return (
-                    <button
-                      key={p.label}
-                      type="button"
-                      onClick={() => setPreset(p.params)}
-                      className={`flex flex-col items-center gap-1 rounded-2xl py-5 transition-shadow ${
-                        active
-                          ? 'bg-background text-foreground shadow-[inset_4px_4px_8px_rgba(150,130,100,0.32),inset_-4px_-4px_8px_rgba(255,255,255,1)]'
-                          : 'bg-background text-foreground shadow-[-4px_-4px_8px_rgba(255,255,255,0.9),4px_4px_8px_rgba(150,130,100,0.28)] active:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.28),inset_-3px_-3px_6px_rgba(255,255,255,0.9)]'
-                      }`}
-                    >
-                      <span className="text-3xl font-semibold tracking-tight">{p.label}</span>
-                      <span className="font-mono text-xs text-muted-foreground">{p.sublabel}</span>
-                    </button>
-                  );
-                })}
+            <div className="space-y-7">
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                    Tree size
+                  </span>
+                  <InfoHint text="How many compressed NFTs this tree can hold. You can mint up to the capacity — but you can't resize later. Pick the smallest that fits." />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-4">
+                  {PRESETS.map((p) => {
+                    const active =
+                      maxDepth === p.params.maxDepth && canopyDepth === p.params.canopyDepth;
+                    return (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => setPreset(p.params)}
+                        className={`flex flex-col items-center gap-1 rounded-2xl py-5 transition-shadow ${
+                          active
+                            ? 'bg-background text-foreground shadow-[inset_4px_4px_8px_rgba(150,130,100,0.32),inset_-4px_-4px_8px_rgba(255,255,255,1)]'
+                            : 'bg-background text-foreground shadow-[-4px_-4px_8px_rgba(255,255,255,0.9),4px_4px_8px_rgba(150,130,100,0.28)] active:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.28),inset_-3px_-3px_6px_rgba(255,255,255,0.9)]'
+                        }`}
+                      >
+                        <span className="text-3xl font-semibold tracking-tight">{p.label}</span>
+                        <span className="font-mono text-xs text-muted-foreground">{p.sublabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-muted-foreground">
-                  Depth
-                  <InfoHint text="2^depth leaves. depth 14 holds ~16K cNFTs." />
-                </label>
-                <label className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-muted-foreground sm:justify-end">
-                  Canopy
-                  <InfoHint text="Caches proofs off-chain. Must be < depth." />
-                </label>
-                <Input
-                  type="number"
-                  min={3}
-                  max={30}
-                  value={maxDepth}
-                  onChange={(e) => setMaxDepth(Number(e.target.value))}
-                  className="font-mono"
-                />
-                <Input
-                  type="number"
-                  min={0}
-                  max={Math.max(0, maxDepth - 1)}
-                  value={canopyDepth}
-                  onChange={(e) => setCanopyDepth(Number(e.target.value))}
-                  className="font-mono"
-                />
+                <Field
+                  label={
+                    <span className="inline-flex items-center gap-2">
+                      Depth
+                      <InfoHint text="The 'depth' of the Merkle tree sets how many leaves it can hold: 2^depth leaves. Depth 14 = ~16K cNFTs. Depth 20 = ~1M cNFTs. Bigger = more rent up front." />
+                    </span>
+                  }
+                >
+                  <Input
+                    type="number"
+                    min={3}
+                    max={30}
+                    value={maxDepth}
+                    onChange={(e) => setMaxDepth(Number(e.target.value))}
+                    className="font-mono"
+                  />
+                </Field>
+                <Field
+                  label={
+                    <span className="inline-flex items-center gap-2">
+                      Canopy
+                      <InfoHint text="The canopy caches proof data off-chain so each mint is smaller on-chain. Must be less than depth. Free to set, set 0 if unsure." />
+                    </span>
+                  }
+                >
+                  <Input
+                    type="number"
+                    min={0}
+                    max={Math.max(0, maxDepth - 1)}
+                    value={canopyDepth}
+                    onChange={(e) => setCanopyDepth(Number(e.target.value))}
+                    className="font-mono"
+                  />
+                </Field>
               </div>
             </div>
           )}
 
           {step === 2 && (
-            <div className="space-y-6">
-              <Input
-                type="number"
-                min={1}
-                max={2 ** maxDepth}
-                value={numNfts}
-                onChange={(e) => setNumNfts(Number(e.target.value))}
-                className="font-mono text-2xl"
-              />
-              <div className="flex flex-wrap gap-2">
-                {[100, 1000, 10_000, 100_000, 1_000_000].map((v) => (
-                  <QuickAmount key={v} value={v} current={numNfts} onClick={setNumNfts} />
-                ))}
+            <div className="space-y-7">
+              <Field
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Items
+                    <InfoHint text={`How many compressed NFTs you plan to mint into this tree. The tree holds up to ${treeCapacity(maxDepth)} leaves; you don't have to use them all. Minting more items costs a small fee per item.`} />
+                  </span>
+                }
+              >
+                <Input
+                  type="number"
+                  min={1}
+                  max={2 ** maxDepth}
+                  value={numNfts}
+                  onChange={(e) => setNumNfts(Number(e.target.value))}
+                  className="font-mono text-2xl"
+                />
+              </Field>
+
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                    Quick amounts
+                  </span>
+                  <InfoHint text="Pick a common size to fill in. You can fine-tune the number above." />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[100, 1000, 10_000, 100_000, 1_000_000].map((v) => (
+                    <QuickAmount key={v} value={v} current={numNfts} onClick={setNumNfts} />
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -442,6 +510,23 @@ function QuickAmount({
     >
       {label}
     </button>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="flex items-center text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+        {label}
+      </span>
+      <div className="mt-2">{children}</div>
+    </label>
   );
 }
 

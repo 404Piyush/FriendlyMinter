@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { useSolana } from "@/components/wallet/useSolana";
+import { getCurrentNetwork } from "@/lib/solana";
 import { LogOut, Wallet } from "lucide-react";
 
 export function WalletButton() {
   const { connected, connecting, disconnect, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
-  const { network } = useSolana();
+  const network = getCurrentNetwork();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
