@@ -1,7 +1,7 @@
 import 'server-only';
 import { mintV1 } from '@metaplex-foundation/mpl-bubblegum';
 import { none, publicKey, some, Umi } from '@metaplex-foundation/umi';
-import { getUmi, isBackendLive } from './umi';
+import { getUmi, isBackendLive, signatureToBase58 } from './umi';
 
 export interface MintInput {
   treeAddress: string;
@@ -51,7 +51,7 @@ export async function mintCompressedNft(input: MintInput): Promise<MintResult> {
   });
 
   return {
-    signature: String(result.signature),
+    signature: signatureToBase58(result.signature),
     leafId: 0,
     assetId: tree.toString(),
   };

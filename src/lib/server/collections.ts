@@ -1,7 +1,7 @@
 import 'server-only';
 import { createTree } from '@metaplex-foundation/mpl-bubblegum';
 import { generateSigner } from '@metaplex-foundation/umi';
-import { getUmi, isBackendLive } from './umi';
+import { getUmi, isBackendLive, signatureToBase58 } from './umi';
 
 export interface CreateTreeInput {
   maxDepth: number;
@@ -43,7 +43,7 @@ export async function createMerkleTree(input: CreateTreeInput): Promise<CreateTr
   });
 
   return {
-    signature: String(result.signature),
+    signature: signatureToBase58(result.signature),
     treeAddress: merkleTree.publicKey.toString(),
     treeAuthority: '',
   };
