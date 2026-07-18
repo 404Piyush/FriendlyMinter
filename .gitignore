@@ -201,3 +201,9 @@ temp/
 
 # Turbo
 .turbo
+
+# Solana deployer keypairs (NEVER commit)
+keys/*
+!keys/.gitkeep
+!keys/.md
+!keys/.keep

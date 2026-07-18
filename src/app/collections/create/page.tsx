@@ -65,6 +65,7 @@ export default function CreateCollectionPage() {
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [description, setDescription] = useState('');
+  const [image, setImage] = useState('');
   const [numNfts, setNumNfts] = useState(1000);
   const [params, setParams] = useState<TreeParams>({ maxDepth: 14, maxBufferSize: 64, canopyDepth: 0 });
   const [submitting, setSubmitting] = useState(false);
@@ -86,19 +87,59 @@ export default function CreateCollectionPage() {
   const mintPct = (cost.mint / totalForBar) * 100;
   const compPct = (cost.compression / totalForBar) * 100;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !symbol.trim()) {
       toast.error('Name and symbol are required');
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success(`${name} (${symbol}) created`, {
-        description: `${numNfts.toLocaleString()} items queued (demo)`,
+    try {
+      const res = await fetch('/api/collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          symbol: symbol.trim(),
+          description: description.trim() || undefined,
+          image: image.trim() || undefined,
+          maxDepth: params.maxDepth,
+          maxBufferSize: params.maxBufferSize,
+          canopyDepth: params.canopyDepth,
+        }),
       });
-    }, 1000);
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.details || data.error || `HTTP ${res.status}`);
+      }
+
+      const col = data.collection;
+      toast.success(`Tree created for ${col.name}`, {
+        description: (
+          <span>
+            Tree:{' '}
+            <a
+              href={col.treeExplorer}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono underline"
+            >
+              {col.treeAddress.slice(0, 6)}…{col.treeAddress.slice(-4)}
+            </a>
+          </span>
+        ),
+        duration: 12000,
+      });
+    } catch (err) {
+      const message = (err as Error).message;
+      toast.error('Create failed', {
+        description: message,
+        duration: 12000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -164,6 +205,8 @@ export default function CreateCollectionPage() {
                     id="image"
                     placeholder="https://…/cover.png"
                     className="mt-2"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
                   />
                 </div>
               </div>
