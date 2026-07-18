@@ -11,8 +11,8 @@ import {
 import type { User } from '../types';
 
 // Environment check
-const USE_MOCK_API = process.env.USE_MOCK_API === 'true';
-const MOCK_DELAY = parseInt(process.env.MOCK_DELAY || '1000');
+const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
+const MOCK_DELAY = parseInt(process.env.NEXT_PUBLIC_MOCK_DELAY || '1000');
 
 // Mock API responses
 export class MockAPI {

@@ -24,10 +24,13 @@ const presets: Array<{ label: string; params: TreeParams; capacity: string }> = 
 ];
 
 function estimateCost(maxDepth: number, maxBufferSize: number, numNfts: number) {
-  const accountsRent = maxBufferSize * 0.000005 + 0.00089;
-  const treeRent = (2 ** maxDepth) * 0.000005;
-  const mintFee = numNfts * 0.000005;
-  const compression = numNfts * 0.0000035;
+  const safeDepth = Number.isFinite(maxDepth) ? Math.max(1, maxDepth) : 14;
+  const safeBuffer = Number.isFinite(maxBufferSize) ? Math.max(1, maxBufferSize) : 64;
+  const safeCount = Number.isFinite(numNfts) ? Math.max(0, numNfts) : 0;
+  const accountsRent = safeBuffer * 0.000005 + 0.00089;
+  const treeRent = (2 ** safeDepth) * 0.000005;
+  const mintFee = safeCount * 0.000005;
+  const compression = safeCount * 0.0000035;
   return {
     rent: accountsRent + treeRent,
     mint: mintFee,
@@ -37,12 +40,17 @@ function estimateCost(maxDepth: number, maxBufferSize: number, numNfts: number) 
 }
 
 function useCountUp(target: number, duration = 350) {
-  const [value, setValue] = useState(target);
+  const safeTarget = Number.isFinite(target) ? target : 0;
+  const [value, setValue] = useState(safeTarget);
   useEffect(() => {
+    if (!Number.isFinite(safeTarget)) {
+      setValue(0);
+      return;
+    }
     const start = value;
-    const delta = target - start;
+    const delta = safeTarget - start;
     if (Math.abs(delta) < 0.0001) {
-      setValue(target);
+      setValue(safeTarget);
       return;
     }
     const t0 = performance.now();
@@ -56,8 +64,8 @@ function useCountUp(target: number, duration = 350) {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target]);
-  return value;
+  }, [safeTarget]);
+  return Number.isFinite(value) ? value : 0;
 }
 
 export default function CreateCollectionPage() {
@@ -121,7 +129,7 @@ export default function CreateCollectionPage() {
             <a
               href={col.treeExplorer}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="font-mono underline"
             >
               {col.treeAddress.slice(0, 6)}…{col.treeAddress.slice(-4)}

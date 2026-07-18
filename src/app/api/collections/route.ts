@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { PublicKey } from '@solana/web3.js';
 import { createMerkleTree } from '@/lib/server/collections';
 import { isBackendLive } from '@/lib/server/umi';
 import { getDeployerPubkey } from '@/lib/server/wallet';
 import { accountUrl, explorerUrl } from '@/lib/server/umi';
 import { isValidTreeConfig, nearestValidConfig } from '@/lib/server/tree-config';
+import { rateLimit, DEFAULT_BACKEND_LIMIT } from '@/lib/server/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,6 +26,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: 'BACKEND_LIVE=false', code: 'BACKEND_DISABLED' },
       { status: 503 }
+    );
+  }
+
+  // Rate-limit BEFORE doing any expensive work. The deployer wallet pays real
+  // SOL for every tree creation, so an unprotected endpoint can drain it.
+  const limit = rateLimit(req, DEFAULT_BACKEND_LIMIT);
+  if (!limit.ok) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests',
+        details: `Rate limit exceeded. Try again in ${limit.retryAfterSec}s.`,
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(limit.retryAfterSec),
+          'X-RateLimit-Remaining': '0',
+        },
+      }
     );
   }
 
@@ -48,6 +69,38 @@ export async function POST(req: NextRequest) {
       },
       { status: 400 }
     );
+  }
+
+  // Bubblegum also requires canopy depth to be strictly less than max depth.
+  if (parsed.canopyDepth >= parsed.maxDepth) {
+    return NextResponse.json(
+      {
+        error: 'Invalid tree config',
+        details: `canopyDepth (${parsed.canopyDepth}) must be less than maxDepth (${parsed.maxDepth}).`,
+        suggested: { ...parsed, canopyDepth: Math.max(0, parsed.maxDepth - 1) },
+      },
+      { status: 400 }
+    );
+  }
+
+  // If the user provided an image URL, restrict to https:// to prevent
+  // javascript:/data:/file: schemes being smuggled into metadata later.
+  if (parsed.image) {
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(parsed.image);
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid image URL', details: 'Image URL must be a valid absolute URL.' },
+        { status: 400 }
+      );
+    }
+    if (parsedUrl.protocol !== 'https:') {
+      return NextResponse.json(
+        { error: 'Invalid image URL', details: 'Image URL must use https://' },
+        { status: 400 }
+      );
+    }
   }
 
   try {
@@ -77,13 +130,14 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const e = err as Error & { cause?: unknown; logs?: unknown[] };
-    const message = e.message;
-    const cause = e.cause ? String((e.cause as { message?: string }).message ?? e.cause) : undefined;
-    const stack = e.stack?.split('\n').slice(0, 4).join(' | ');
-    console.error('[/api/collections POST]', message, cause, stack);
+    const e = err as Error & { cause?: unknown };
+    console.error('[/api/collections POST]', e.message, e.cause);
+    // Don't leak stack traces or library internals in the response body.
     return NextResponse.json(
-      { error: 'Failed to create Merkle tree', details: message, cause, stack },
+      {
+        error: 'Failed to create Merkle tree',
+        details: process.env.NODE_ENV === 'development' ? e.message : 'Internal error',
+      },
       { status: 500 }
     );
   }

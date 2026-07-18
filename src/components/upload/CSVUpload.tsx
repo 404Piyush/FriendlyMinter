@@ -170,12 +170,23 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
     setIsProcessing(true);
     setParsedData(null);
 
+    // Track the progress interval outside try/catch so we can clean up
+    // even when Papa.parse throws synchronously.
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+    const clearProgress = () => {
+      if (progressInterval !== null) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    };
+
     try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadedFiles(prev => 
-          prev.map(f => 
-            f.id === fileId 
+      // Simulate upload progress. Always cleared via the helper to avoid leaks
+      // if Papa.parse throws synchronously (e.g. unsupported File type).
+      progressInterval = setInterval(() => {
+        setUploadedFiles(prev =>
+          prev.map(f =>
+            f.id === fileId
               ? { ...f, progress: Math.min(f.progress + 10, 90) }
               : f
           )
@@ -187,7 +198,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
-          clearInterval(progressInterval);
+          clearProgress();
           
           if (results.errors.length > 0) {
             const errorMessage = results.errors.map(e => e.message).join(', ');
@@ -233,7 +244,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           setIsProcessing(false);
         },
         error: (error) => {
-          clearInterval(progressInterval);
+          clearProgress();
           setUploadedFiles(prev => 
             prev.map(f => 
               f.id === fileId 
@@ -246,9 +257,10 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         }
       });
     } catch (error) {
-      setUploadedFiles(prev => 
-        prev.map(f => 
-          f.id === fileId 
+      clearProgress();
+      setUploadedFiles(prev =>
+        prev.map(f =>
+          f.id === fileId
             ? { ...f, status: 'error', error: 'Failed to process file' }
             : f
         )
