@@ -15,5 +15,5 @@
 *.woff     binary
 *.woff2    binary
 
-# Lockfiles: keep LF, suppress diff noise
-package-lock.json  -diff
+# Lockfiles: keep LF, suppress diff noise in PR reviews
+package-lock.json  -diff linguist-generated=true
