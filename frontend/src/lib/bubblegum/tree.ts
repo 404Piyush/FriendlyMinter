@@ -1,6 +1,7 @@
 import {
   generateSigner,
   none,
+  percentAmount,
 } from '@metaplex-foundation/umi';
 import {
   createTree,
@@ -87,14 +88,13 @@ export async function createBubblegumCollection(
     symbol: args.symbol,
     uri: args.uri,
     isCollection: true,
-    sellerFeeBasisPoints: 0,
+    sellerFeeBasisPoints: percentAmount(0),
     creators: args.creators ?? [{ address: umi.identity.publicKey, verified: true, share: 100 }],
     collection: none(),
     uses: none(),
     primarySaleHappened: false,
     isMutable: true,
     decimals: 0,
-    tokenStandard: 0,
   });
   const sig = await tx.sendAndConfirm(umi, { confirm: { commitment: 'confirmed' } });
   return { collection: mint.publicKey, signature: sig.signature };
