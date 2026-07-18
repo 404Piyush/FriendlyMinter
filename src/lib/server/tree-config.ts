@@ -1,9 +1,9 @@
 // Bubblegum program only accepts a fixed set of (maxDepth, maxBufferSize)
-// combinations. Source: Metaplex Bubblegum program constants.
+// combinations. The set below reflects what the current devnet program
+// (BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY) accepts at the time of
+// writing — verified by calling the program. Smaller trees (depth ≤ 10) are
+// no longer supported on devnet as of 2026.
 export const VALID_TREE_CONFIGS: Array<{ maxDepth: number; maxBufferSize: number }> = [
-  { maxDepth: 3, maxBufferSize: 8 },
-  { maxDepth: 5, maxBufferSize: 8 },
-  { maxDepth: 10, maxBufferSize: 8 },
   { maxDepth: 14, maxBufferSize: 64 },
   { maxDepth: 14, maxBufferSize: 256 },
   { maxDepth: 14, maxBufferSize: 1024 },
@@ -43,7 +43,6 @@ export function nearestValidConfig(maxDepth: number, maxBufferSize: number): { m
   );
   if (exact) return exact;
 
-  // Pick the closest valid config: same depth with nearest buffer, else nearest depth.
   const sameDepth = VALID_TREE_CONFIGS.filter((c) => c.maxDepth === maxDepth);
   if (sameDepth.length > 0) {
     sameDepth.sort((a, b) => Math.abs(a.maxBufferSize - maxBufferSize) - Math.abs(b.maxBufferSize - maxBufferSize));
