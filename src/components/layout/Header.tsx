@@ -60,14 +60,14 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between gap-6">
+    <header className="sticky top-0 z-50">
+      <div className="container mx-auto flex h-20 items-center justify-between gap-6">
         <Link href="/" className="group flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center text-foreground transition-opacity group-hover:opacity-70">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-background text-foreground shadow-[-3px_-3px_6px_rgba(255,255,255,0.9),3px_3px_6px_rgba(150,130,100,0.28)] transition-shadow group-active:shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]">
             <SolMark size={20} />
           </div>
-          <span className="font-serif text-lg leading-none tracking-tight text-foreground">
-            Friendly<span className="text-foreground">Minter</span>
+          <span className="text-lg font-semibold tracking-tight text-foreground">
+            FriendlyMinter
           </span>
         </Link>
 

@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { InfoHint } from '@/components/ui/info-hint';
-import { Stepper, ProgressBar } from '@/components/ui/stepper';
+import { Stepper } from '@/components/ui/stepper';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, RotateCcw, Check } from 'lucide-react';
 
@@ -21,17 +20,17 @@ interface TreeParams {
 const FIXED_BUFFER_SIZE = 64;
 
 const PRESETS: Array<{ label: string; sublabel: string; params: TreeParams }> = [
-  { label: 'S', sublabel: '16K leaves', params: { maxDepth: 14, maxBufferSize: 64, canopyDepth: 0 } },
-  { label: 'M', sublabel: '131K leaves', params: { maxDepth: 17, maxBufferSize: 64, canopyDepth: 0 } },
-  { label: 'L', sublabel: '1M leaves', params: { maxDepth: 20, maxBufferSize: 64, canopyDepth: 0 } },
-  { label: 'XL', sublabel: '16M leaves', params: { maxDepth: 24, maxBufferSize: 64, canopyDepth: 0 } },
+  { label: 'S', sublabel: '16K', params: { maxDepth: 14, maxBufferSize: 64, canopyDepth: 0 } },
+  { label: 'M', sublabel: '131K', params: { maxDepth: 17, maxBufferSize: 64, canopyDepth: 0 } },
+  { label: 'L', sublabel: '1M', params: { maxDepth: 20, maxBufferSize: 64, canopyDepth: 0 } },
+  { label: 'XL', sublabel: '16M', params: { maxDepth: 24, maxBufferSize: 64, canopyDepth: 0 } },
 ];
 
 const STEPS = [
-  { id: 'meta', title: 'Name & symbol', description: 'What the collection is called' },
-  { id: 'tree', title: 'Tree size', description: 'How many leaves it can hold' },
-  { id: 'volume', title: 'Mint volume', description: 'How many items you plan to mint' },
-  { id: 'review', title: 'Review & create', description: 'Confirm the details' },
+  { id: 'meta', title: 'Name' },
+  { id: 'tree', title: 'Tree' },
+  { id: 'volume', title: 'Volume' },
+  { id: 'review', title: 'Review' },
 ];
 
 function estimateCost(maxDepth: number, numNfts: number) {
@@ -79,7 +78,7 @@ function useSmoothNumber(target: number, duration = 250) {
 }
 
 function fmt(n: number, p = 4) {
-  return Number.isFinite(n) ? n.toFixed(p) : "0";
+  return Number.isFinite(n) ? n.toFixed(p) : '0';
 }
 
 function treeCapacity(maxDepth: number): string {
@@ -162,26 +161,17 @@ export default function CreateCollectionPage() {
       }
 
       const col = data.collection;
-      toast.success('Tree created on Solana devnet', {
+      toast.success('Tree created', {
         description: (
-          <span>
-            Tree:{' '}
-            <a
-              href={col.treeExplorer}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono underline-offset-4 hover:underline"
-            >
-              {col.treeAddress.slice(0, 6)}…{col.treeAddress.slice(-4)}
-            </a>
+          <span className="font-mono">
+            {col.treeAddress.slice(0, 6)}…{col.treeAddress.slice(-4)}
           </span>
         ),
         duration: 15000,
       });
       reset();
     } catch (err) {
-      const message = (err as Error).message;
-      toast.error('Create failed', { description: message, duration: 15000 });
+      toast.error('Create failed', { description: (err as Error).message, duration: 15000 });
     } finally {
       setSubmitting(false);
     }
@@ -190,29 +180,16 @@ export default function CreateCollectionPage() {
   return (
     <div>
       <Header />
-      <main className="container mx-auto max-w-4xl px-6 py-12">
-        <Link
-          href="/collections"
-          className="mb-6 inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-3" />
-          Collections
-        </Link>
-
-        <div className="flex items-baseline justify-between gap-4">
-          <h1 className="text-5xl tracking-tight md:text-6xl">New collection</h1>
-          <span className="font-mono text-xs text-muted-foreground">
-            {step + 1} of {STEPS.length}
-          </span>
-        </div>
-
-        <p className="mt-3 max-w-prose text-base text-muted-foreground">
-          Set up an on-chain Merkle tree that will hold your compressed NFTs. The deployer
-          wallet signs the create-tree transaction on Solana devnet — no mainnet funds touched.
-        </p>
-
-        {/* Stepper breadcrumb */}
-        <div className="mt-10">
+      <main className="container mx-auto max-w-2xl px-6 py-16">
+        {/* Top bar: back link + stepper */}
+        <div className="mb-10 flex items-center justify-between gap-4">
+          <Link
+            href="/collections"
+            className="inline-flex size-11 items-center justify-center rounded-xl bg-background text-foreground shadow-[-3px_-3px_6px_rgba(255,255,255,0.9),3px_3px_6px_rgba(150,130,100,0.28)] transition-shadow active:shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]"
+            aria-label="Back"
+          >
+            <ArrowLeft className="size-4" />
+          </Link>
           <Stepper
             steps={STEPS}
             current={step}
@@ -222,338 +199,193 @@ export default function CreateCollectionPage() {
             }}
           />
         </div>
-        <ProgressBar value={(step + 1) / STEPS.length} />
 
-        {/* Slim cost bar */}
-        <CostBar
-          total={aTotal}
-          rent={aRent}
-          mints={aMint}
-          comp={aComp}
-          numNfts={numNfts}
-          capacity={treeCapacity(maxDepth)}
-          savingsPct={savingsPct}
-        />
+        {/* Headline — minimal */}
+        <h1 className="text-3xl font-semibold tracking-tight">
+          {step === 0 && 'Name your collection'}
+          {step === 1 && 'Pick a tree size'}
+          {step === 2 && 'How many items?'}
+          {step === 3 && 'Review & create'}
+        </h1>
 
-        {/* Form body */}
-        <div className="mt-12">
+        {/* Live cost display — single big number, neumorphic */}
+        <div className="mt-8 rounded-2xl bg-background px-6 py-5 shadow-[inset_4px_4px_8px_rgba(150,130,100,0.28),inset_-4px_-4px_8px_rgba(255,255,255,0.9)]">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Total cost</span>
+            <span className="font-mono text-4xl font-medium tabular-nums tracking-tight">
+              {fmt(aTotal)}
+              <span className="ml-1 text-base text-muted-foreground">SOL</span>
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
+            <span>rent <span className="text-foreground tabular-nums">{fmt(aRent)}</span></span>
+            <span>·</span>
+            <span>{numNfts.toLocaleString()} mints <span className="text-foreground tabular-nums">{fmt(aMint)}</span></span>
+            <span>·</span>
+            <span>compression <span className="text-foreground tabular-nums">{fmt(aComp)}</span></span>
+            <span>·</span>
+            <span>saves <span className="text-sol-green">{Math.max(0, savingsPct).toFixed(1)}%</span></span>
+          </div>
+        </div>
+
+        {/* Step content */}
+        <div className="mt-10">
           {step === 0 && (
-            <StepFrame
-              eyebrow="Step 01 — Name & symbol"
-              title="Tell us what to call it"
-              description="The name and symbol show up in wallets, marketplaces, and the Solana explorer."
-            >
-              <div className="grid gap-6 md:grid-cols-3">
-                <Field label="Collection name" htmlFor="name" className="md:col-span-2">
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div className="sm:col-span-2">
                   <Input
-                    id="name"
-                    placeholder="Solana Genesis Pixels"
+                    placeholder="Collection name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     maxLength={64}
                     autoFocus
                   />
-                </Field>
-                <Field label="Symbol" htmlFor="symbol">
-                  <Input
-                    id="symbol"
-                    placeholder="GPX"
-                    value={symbol}
-                    onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                    maxLength={10}
-                  />
-                </Field>
-              </div>
-              <Field label="Description" htmlFor="description">
-                <Textarea
-                  id="description"
-                  placeholder="Optional. A short pitch for the collection."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="min-h-[88px] rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm transition-colors hover:border-foreground/30 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-                />
-              </Field>
-              <Field label="Cover image URL" htmlFor="image">
+                </div>
                 <Input
-                  id="image"
-                  placeholder="https://…/cover.png"
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="Symbol"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                  maxLength={10}
+                  className="font-mono"
                 />
-              </Field>
-            </StepFrame>
+              </div>
+              <Textarea
+                placeholder="Description (optional)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-[80px] rounded-xl bg-background px-4 py-2 text-base shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] outline-none transition-shadow duration-150 placeholder:text-ink-faint focus:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.32),inset_-3px_-3px_6px_rgba(255,255,255,1)]"
+              />
+              <Input
+                placeholder="Cover image URL (optional)"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
+            </div>
           )}
 
           {step === 1 && (
-            <StepFrame
-              eyebrow="Step 02 — Tree size"
-              title="How big should the tree be?"
-              description="Pick the smallest preset that fits. You can't resize later — but you can always create another tree."
-            >
-              <div>
-                <div className="mb-4 flex items-center gap-2">
-                  <Label>Presets</Label>
-                  <InfoHint text="Each preset is a (depth, buffer) pair the Bubblegum program accepts on devnet. Pick the smallest that fits your collection — bigger trees cost more rent up front." />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  {PRESETS.map((p) => {
-                    const active =
-                      maxDepth === p.params.maxDepth && canopyDepth === p.params.canopyDepth;
-                    return (
-                      <button
-                        key={p.label}
-                        type="button"
-                        onClick={() => setPreset(p.params)}
-                        className={`group flex flex-col items-start gap-1 rounded-lg border p-4 text-left transition-colors ${
-                          active
-                            ? 'border-foreground bg-foreground text-background shadow-sm'
-                            : 'border-border bg-card text-foreground hover:border-foreground/40'
-                        }`}
-                      >
-                        <div className="flex w-full items-baseline justify-between">
-                          <span className="text-2xl font-serif leading-none tracking-tight">{p.label}</span>
-                          <span className={`font-mono text-[10px] uppercase tracking-[0.18em] ${active ? 'text-background/70' : 'text-muted-foreground'}`}>
-                            {p.sublabel}
-                          </span>
-                        </div>
-                        <div className={`font-mono text-xs ${active ? 'text-background/80' : 'text-muted-foreground'}`}>
-                          depth {p.params.maxDepth} · canopy {p.params.canopyDepth}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="space-y-6">
+              <div className="grid gap-3 sm:grid-cols-4">
+                {PRESETS.map((p) => {
+                  const active =
+                    maxDepth === p.params.maxDepth && canopyDepth === p.params.canopyDepth;
+                  return (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => setPreset(p.params)}
+                      className={`flex flex-col items-center gap-1 rounded-2xl py-5 transition-shadow ${
+                        active
+                          ? 'bg-background text-foreground shadow-[inset_4px_4px_8px_rgba(150,130,100,0.32),inset_-4px_-4px_8px_rgba(255,255,255,1)]'
+                          : 'bg-background text-foreground shadow-[-4px_-4px_8px_rgba(255,255,255,0.9),4px_4px_8px_rgba(150,130,100,0.28)] active:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.28),inset_-3px_-3px_6px_rgba(255,255,255,0.9)]'
+                      }`}
+                    >
+                      <span className="text-3xl font-semibold tracking-tight">{p.label}</span>
+                      <span className="font-mono text-xs text-muted-foreground">{p.sublabel}</span>
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="mt-8 grid gap-6 md:grid-cols-2">
-                <Field
-                  label={
-                    <span className="inline-flex items-center gap-2">
-                      Max depth
-                      <InfoHint text="Depth sets the tree's capacity: 2^depth leaves. depth 14 holds ~16K cNFTs, depth 20 holds ~1M." />
-                    </span>
-                  }
-                  htmlFor="maxDepth"
-                >
-                  <Input
-                    id="maxDepth"
-                    type="number"
-                    min={3}
-                    max={30}
-                    value={maxDepth}
-                    onChange={(e) => setMaxDepth(Number(e.target.value))}
-                    className="font-mono"
-                  />
-                </Field>
-                <Field
-                  label={
-                    <span className="inline-flex items-center gap-2">
-                      Canopy depth
-                      <InfoHint text="The canopy caches Merkle proofs off-chain, reducing per-mint proof size. Must be less than max depth." />
-                    </span>
-                  }
-                  htmlFor="canopyDepth"
-                >
-                  <Input
-                    id="canopyDepth"
-                    type="number"
-                    min={0}
-                    max={Math.max(0, maxDepth - 1)}
-                    value={canopyDepth}
-                    onChange={(e) => setCanopyDepth(Number(e.target.value))}
-                    className="font-mono"
-                  />
-                </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                  Depth
+                  <InfoHint text="2^depth leaves. depth 14 holds ~16K cNFTs." />
+                </label>
+                <label className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-muted-foreground sm:justify-end">
+                  Canopy
+                  <InfoHint text="Caches proofs off-chain. Must be < depth." />
+                </label>
+                <Input
+                  type="number"
+                  min={3}
+                  max={30}
+                  value={maxDepth}
+                  onChange={(e) => setMaxDepth(Number(e.target.value))}
+                  className="font-mono"
+                />
+                <Input
+                  type="number"
+                  min={0}
+                  max={Math.max(0, maxDepth - 1)}
+                  value={canopyDepth}
+                  onChange={(e) => setCanopyDepth(Number(e.target.value))}
+                  className="font-mono"
+                />
               </div>
-
-              <Field
-                label={
-                  <span className="inline-flex items-center gap-2">
-                    Buffer size
-                    <InfoHint text="The buffer holds the next-available leaves for concurrent writes. Larger buffer = more headroom but slightly more rent." />
-                  </span>
-                }
-              >
-                <Input value={FIXED_BUFFER_SIZE} disabled className="font-mono" />
-              </Field>
-            </StepFrame>
+            </div>
           )}
 
           {step === 2 && (
-            <StepFrame
-              eyebrow="Step 03 — Mint volume"
-              title="How many items?"
-              description="The mint fee and compression cost scale linearly with item count. Tree rent is paid once."
-            >
-              <div className="grid gap-6 md:grid-cols-2">
-                <Field
-                  label={
-                    <span className="inline-flex items-center gap-2">
-                      Items
-                      <InfoHint text="Total cNFTs you plan to mint into this tree. Caps at the tree's capacity (2^max depth). You don't have to mint them all at once." />
-                    </span>
-                  }
-                  htmlFor="num"
-                >
-                  <Input
-                    id="num"
-                    type="number"
-                    min={1}
-                    max={2 ** maxDepth}
-                    value={numNfts}
-                    onChange={(e) => setNumNfts(Number(e.target.value))}
-                    className="font-mono text-base"
-                  />
-                </Field>
-                <Field label="Per-item cost">
-                  <div className="flex h-10 items-center rounded-md border border-border bg-muted px-3 font-mono text-sm tabular-nums text-muted-foreground">
-                    0.0000085 SOL · {((aMint + aComp) / Math.max(numNfts, 1)).toFixed(7)} each
-                  </div>
-                </Field>
+            <div className="space-y-6">
+              <Input
+                type="number"
+                min={1}
+                max={2 ** maxDepth}
+                value={numNfts}
+                onChange={(e) => setNumNfts(Number(e.target.value))}
+                className="font-mono text-2xl"
+              />
+              <div className="flex flex-wrap gap-2">
+                {[100, 1000, 10_000, 100_000, 1_000_000].map((v) => (
+                  <QuickAmount key={v} value={v} current={numNfts} onClick={setNumNfts} />
+                ))}
               </div>
-
-              <div>
-                <Label>Quick amounts</Label>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[100, 1000, 10_000, 100_000, 1_000_000].map((v) => (
-                    <QuickAmount key={v} value={v} current={numNfts} onClick={setNumNfts} />
-                  ))}
-                </div>
-              </div>
-            </StepFrame>
+            </div>
           )}
 
           {step === 3 && (
-            <StepFrame
-              eyebrow="Step 04 — Review"
-              title="Last look before signing"
-              description="The deployer wallet will sign a create_tree transaction on Solana devnet."
-            >
-              <dl className="overflow-hidden rounded-lg border border-border bg-card">
-                <Row label="Name" value={name || '—'} />
-                <Row label="Symbol" value={symbol ? symbol.toUpperCase() : '—'} mono />
-                {description && <Row label="Description" value={description} />}
-                {image && <Row label="Cover image" value={image} mono />}
-                <Row
+            <div className="rounded-2xl bg-background p-6 shadow-[-6px_-6px_14px_rgba(255,255,255,0.9),6px_6px_14px_rgba(150,130,100,0.28)]">
+              <dl className="space-y-3 font-mono text-sm">
+                <ReviewRow label="Name" value={name || '—'} />
+                <ReviewRow label="Symbol" value={symbol ? symbol.toUpperCase() : '—'} />
+                {description && <ReviewRow label="Description" value={description} />}
+                <ReviewRow
                   label="Tree"
-                  value={`depth ${maxDepth} · ${treeCapacity(maxDepth)} leaves · canopy ${canopyDepth} · buffer ${FIXED_BUFFER_SIZE}`}
-                  mono
+                  value={`depth ${maxDepth} · ${treeCapacity(maxDepth)} leaves · buffer ${FIXED_BUFFER_SIZE}`}
                 />
-                <Row label="Items" value={numNfts.toLocaleString()} mono />
-                <Row
-                  label="Total cost"
-                  value={`${fmt(aTotal)} SOL`}
-                  mono
-                  emphasize
-                />
+                <ReviewRow label="Items" value={numNfts.toLocaleString()} />
+                <ReviewRow label="Total" value={`${fmt(aTotal)} SOL`} highlight />
               </dl>
-
-              <p className="mt-6 font-mono text-xs text-muted-foreground">
-                Deployer 9Towwzyi7pJbZNi4b25PexUXjHZP2pbFSQWWiMLg3A7e · devnet
+              <p className="mt-4 font-mono text-[10px] text-muted-foreground">
+                9Toww…3A7e · devnet
               </p>
-            </StepFrame>
-          )}
-
-          {/* Navigation */}
-          <div className="mt-12 flex items-center justify-between border-t border-border pt-6">
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={back} disabled={step === 0 || submitting}>
-                <ArrowLeft className="size-3.5" />
-                Back
-              </Button>
-              {step > 0 && (
-                <Button variant="ghost" onClick={reset} disabled={submitting}>
-                  <RotateCcw className="size-3.5" />
-                  Start over
-                </Button>
-              )}
             </div>
-
-            {step < STEPS.length - 1 ? (
-              <Button onClick={next} disabled={!canAdvance} size="lg">
-                Continue
-                <ArrowRight className="size-3.5" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit} disabled={submitting} size="lg">
-                {submitting ? 'Signing…' : 'Create tree on devnet'}
-                {!submitting && <Check className="size-4" />}
-              </Button>
-            )}
-          </div>
+          )}
         </div>
+
+        {/* Navigation */}
+        <div className="mt-10 flex items-center justify-between">
+          <Button variant="neu" onClick={back} disabled={step === 0 || submitting}>
+            <ArrowLeft className="size-4" />
+          </Button>
+          {step < STEPS.length - 1 ? (
+            <Button onClick={next} disabled={!canAdvance} size="lg">
+              Continue
+              <ArrowRight className="size-4" />
+            </Button>
+          ) : (
+            <Button onClick={handleSubmit} disabled={submitting} size="lg">
+              {submitting ? 'Signing…' : 'Create tree'}
+              {!submitting && <Check className="size-4" />}
+            </Button>
+          )}
+        </div>
+
+        {step > 0 && (
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={reset}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="size-3" />
+              Start over
+            </button>
+          </div>
+        )}
       </main>
-    </div>
-  );
-}
-
-function StepFrame({
-  eyebrow,
-  title,
-  description,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-        {eyebrow}
-      </p>
-      <h2 className="mt-3 text-3xl tracking-tight md:text-4xl">{title}</h2>
-      {description && (
-        <p className="mt-3 max-w-prose text-base leading-relaxed text-muted-foreground">{description}</p>
-      )}
-      <div className="mt-10 space-y-7">{children}</div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  htmlFor,
-  className,
-  children,
-}: {
-  label: React.ReactNode;
-  htmlFor?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={className}>
-      <Label htmlFor={htmlFor} className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
-        {label}
-      </Label>
-      <div className="mt-2">{children}</div>
-    </div>
-  );
-}
-
-function Row({
-  label,
-  value,
-  mono,
-  emphasize,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  emphasize?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-border px-5 py-3.5 last:border-0">
-      <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</dt>
-      <dd
-        className={`min-w-0 truncate text-right text-sm ${
-          mono ? 'font-mono tabular-nums' : ''
-        } ${emphasize ? 'text-lg font-serif font-normal tracking-tight text-foreground' : 'text-foreground'}`}
-      >
-        {value}
-      </dd>
     </div>
   );
 }
@@ -573,10 +405,10 @@ function QuickAmount({
     <button
       type="button"
       onClick={() => onClick(value)}
-      className={`rounded-md border px-3 py-1.5 font-mono text-xs tabular-nums transition-colors ${
+      className={`rounded-xl px-4 py-2 font-mono text-sm tabular-nums transition-shadow ${
         active
-          ? 'border-foreground bg-foreground text-background'
-          : 'border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground'
+          ? 'bg-background text-foreground shadow-[inset_3px_3px_6px_rgba(150,130,100,0.32),inset_-3px_-3px_6px_rgba(255,255,255,1)]'
+          : 'bg-background text-muted-foreground shadow-[-2px_-2px_4px_rgba(255,255,255,0.9),2px_2px_4px_rgba(150,130,100,0.28)] hover:text-foreground active:shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]'
       }`}
     >
       {label}
@@ -584,48 +416,21 @@ function QuickAmount({
   );
 }
 
-function CostBar({
-  total,
-  rent,
-  mints,
-  comp,
-  numNfts,
-  capacity,
-  savingsPct,
+function ReviewRow({
+  label,
+  value,
+  highlight,
 }: {
-  total: number;
-  rent: number;
-  mints: number;
-  comp: number;
-  numNfts: number;
-  capacity: string;
-  savingsPct: number;
+  label: string;
+  value: string;
+  highlight?: boolean;
 }) {
   return (
-    <section className="mt-8 rounded-lg border border-border bg-card px-5 py-3 shadow-sm">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 font-mono text-xs">
-        <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          Live cost
-        </span>
-        <span className="text-base font-serif font-normal tracking-tight text-foreground tabular-nums">
-          {fmt(total)} <span className="text-xs text-muted-foreground">SOL</span>
-        </span>
-        <span className="text-muted-foreground">
-          rent <span className="text-foreground tabular-nums">{fmt(rent)}</span>
-        </span>
-        <span className="text-muted-foreground">
-          {numNfts.toLocaleString()} mints <span className="text-foreground tabular-nums">{fmt(mints)}</span>
-        </span>
-        <span className="text-muted-foreground">
-          compression <span className="text-foreground tabular-nums">{fmt(comp)}</span>
-        </span>
-        <span className="text-muted-foreground">
-          saves <span className="text-foreground tabular-nums">{Math.max(0, savingsPct).toFixed(1)}%</span>
-        </span>
-        <span className="text-muted-foreground">
-          capacity <span className="text-foreground">{capacity}</span> leaves
-        </span>
-      </div>
-    </section>
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">{label}</dt>
+      <dd className={`text-right ${highlight ? 'text-xl font-medium tabular-nums text-foreground' : 'tabular-nums text-foreground'}`}>
+        {value}
+      </dd>
+    </div>
   );
 }

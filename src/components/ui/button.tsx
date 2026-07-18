@@ -5,24 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium rounded-md cursor-pointer select-none transition-colors duration-150 ease-out disabled:pointer-events-none disabled:opacity-40 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive active:translate-y-px",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium rounded-xl cursor-pointer select-none transition-shadow duration-150 ease-out disabled:pointer-events-none disabled:opacity-40 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:outline-none aria-invalid:ring-destructive",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/85",
+          "bg-primary text-primary-foreground hover:brightness-95 active:brightness-90",
+        neu:
+          "bg-background text-foreground shadow-[-3px_-3px_6px_rgba(255,255,255,0.9),3px_3px_6px_rgba(150,130,100,0.28)] hover:shadow-[-2px_-2px_4px_rgba(255,255,255,0.9),2px_2px_4px_rgba(150,130,100,0.28)] active:shadow-[inset_3px_3px_6px_rgba(150,130,100,0.28),inset_-3px_-3px_6px_rgba(255,255,255,0.9)]",
         outline:
-          "border border-border bg-card text-foreground hover:bg-secondary hover:border-foreground/20",
+          "bg-background text-foreground shadow-[-2px_-2px_4px_rgba(255,255,255,0.9),2px_2px_4px_rgba(150,130,100,0.28)] hover:shadow-[-3px_-3px_6px_rgba(255,255,255,0.9),3px_3px_6px_rgba(150,130,100,0.28)] active:shadow-[inset_2px_2px_4px_rgba(150,130,100,0.28),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]",
         ghost:
-          "bg-transparent text-foreground hover:bg-secondary",
+          "bg-transparent text-foreground hover:bg-background",
         link:
           "text-foreground underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 has-[>svg]:px-3",
-        sm: "h-8 px-3 text-xs has-[>svg]:px-2.5",
-        lg: "h-12 px-6 has-[>svg]:px-5 text-base",
-        icon: "size-10 [&_svg]:size-4",
+        default: "h-11 px-5 has-[>svg]:px-4",
+        sm: "h-9 px-3 text-xs has-[>svg]:px-2.5",
+        lg: "h-14 px-7 has-[>svg]:px-6 text-base",
+        icon: "size-11 [&_svg]:size-4",
       },
     },
     defaultVariants: {

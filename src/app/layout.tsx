@@ -1,24 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, JetBrains_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter_Tight({
+const geist = Geist({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400"],
-  style: ["normal", "italic"],
-});
-
-const jbMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   variable: "--font-jbmono",
   subsets: ["latin"],
   display: "swap",
@@ -27,7 +19,7 @@ const jbMono = JetBrains_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f8f5ee",
+  themeColor: "#e8e1d4",
 };
 
 export const metadata: Metadata = {
@@ -76,7 +68,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${instrumentSerif.variable} ${jbMono.variable}`}
+      className={`${geist.variable} ${geistMono.variable}`}
     >
       <body>
         <WalletProvider>
